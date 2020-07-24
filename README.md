@@ -5,6 +5,9 @@ Libretro API Headers v1.8.9 for FPC / Lazarus, based on libretro.h
 * All for easy starters.
 
 
+** Please feel free to contribute, all welcome **
+
+
 ![Image](https://github.com/tednilsen/Libretro-FPC/blob/master/examples/welcome/RPi3.png)
 Raspberry Pi example
 
