@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <PathDelim Value="\"/>
+    <General>
+      <Flags>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <MainUnitHasScaledStatement Value="False"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="Libretro Welcome"/>
+      <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
+    </General>
+    <BuildModes>
+      <Item Name="Linux RPi3" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <HostApplicationFilename Value="\opt\retropie\emulators\retroarch\bin\retroarch"/>
+        <CommandLineParams Value="-L \opt\retropie\libretrocores\lr-fpc\libretro_welcome.so --config \opt\retropie\configs\all\retroarch.cfg"/>
+        <LaunchingApplication PathPlusParams="\opt\retropie\emulators\retroarch\bin\retroarch ${TargetCmdLine}"/>
+      </local>
+      <FormatVersion Value="2"/>
+      <Modes>
+        <Mode Name="Linux RPi3">
+          <local>
+            <HostApplicationFilename Value="\opt\retropie\emulators\retroarch\bin\retroarch"/>
+            <CommandLineParams Value="-L \opt\retropie\libretrocores\lr-fpc\libretro_welcome.so --config \opt\retropie\configs\all\retroarch.cfg"/>
+            <LaunchingApplication PathPlusParams="\opt\retropie\emulators\retroarch\bin\retroarch ${TargetCmdLine}"/>
+          </local>
+        </Mode>
+      </Modes>
+    </RunParams>
+    <Units>
+      <Unit>
+        <Filename Value="libretro_welcome.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="\opt\retropie\libretrocores\lr-fpc\libretro_welcome"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir);..\..\include;..\..\helpers"/>
+      <OtherUnitFiles Value="..\..\include;..\..\helpers"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+      <TargetProcessor Value="ARMV7A"/>
+      <TargetCPU Value="arm"/>
+      <TargetOS Value="linux"/>
+      <Optimizations>
+        <OptimizationLevel Value="4"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+      <Options>
+        <ExecutableType Value="Library"/>
+      </Options>
+    </Linking>
+    <Other>
+      <WriteFPCLogo Value="False"/>
+      <CustomOptions Value="-CfNEON_VFPV4
+-CpARMV7A
+-Cg
+-OoFASTMATH
+-OpARMV7A
+-Sv
+-CF32
+-OoREMOVEEMPTYPROCS
+-Parm"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions>
+      <Item>
+        <Name Value="EAbort"/>
+      </Item>
+      <Item>
+        <Name Value="ECodetoolError"/>
+      </Item>
+      <Item>
+        <Name Value="EFOpenError"/>
+      </Item>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
