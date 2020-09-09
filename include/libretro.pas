@@ -12,7 +12,7 @@ unit libretro;
 //  - original header:
 //      https://github.com/libretro/RetroArch/blob/master/libretro-common/include/libretro.h
 //
-//  - Header v1.8.9
+//  - Header v1.9.0
 //    Minimum supported Libretro version are starting from v1.7.0
 //
 //  - Please edit libretro.inc for configuration.
@@ -20,6 +20,9 @@ unit libretro;
 //
 //  Changelog:
 //  ----------
+//
+//  * 2020.09.09
+//    - Update to RetroArch v1.9.0
 //
 //  * 2020.07.23
 //    - Update to RetroArch v1.8.9
@@ -1487,6 +1490,22 @@ const
                                                  * fallback, stderr).
                                                  *}
   RETRO_ENVIRONMENT_SET_MESSAGE_EXT = 60;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 190}
+                                                {* unsigned * --
+                                                 * Unsigned value is the number of active input devices
+                                                 * provided by the frontend. This may change between
+                                                 * frames, but will remain constant for the duration
+                                                 * of each frame.
+                                                 * If callback returns true, a core need not poll any
+                                                 * input device with an index greater than or equal to
+                                                 * the number of active devices.
+                                                 * If callback returns false, the number of active input
+                                                 * devices is unknown. In this case, all input devices
+                                                 * should be considered active.
+                                                 *}
+  RETRO_ENVIRONMENT_GET_INPUT_MAX_USERS = 61;
   {$ENDIF}
 
   {* VFS functionality *}
@@ -3201,4 +3220,3 @@ implementation
 {$ENDIF LIBRETRO_H__}
 
 end.
-
