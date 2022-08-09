@@ -12,7 +12,7 @@ unit libretro;
 //  - original header:
 //      https://github.com/libretro/RetroArch/blob/master/libretro-common/include/libretro.h
 //
-//  - Header v1.9.0
+//  - Header v1.10.3
 //    Minimum supported Libretro version are starting from v1.7.0
 //
 //  - Please edit libretro.inc for configuration.
@@ -20,6 +20,10 @@ unit libretro;
 //
 //  Changelog:
 //  ----------
+//
+//  * 2022.08.07
+//    - Update to RetroArch v1.10.3
+//    - redefined macro-version numbering
 //
 //  * 2020.09.09
 //    - Update to RetroArch v1.9.0
@@ -187,7 +191,7 @@ const
   RETRO_DEVICE_ID_JOYPAD_L3             = 14;
   RETRO_DEVICE_ID_JOYPAD_R3             = 15;
 
-  {$IF RETRO_VERSION >= 178}
+  {$IF RETRO_VERSION >= 107080}
   RETRO_DEVICE_ID_JOYPAD_MASK           = 256;
   {$ENDIF}
 
@@ -238,7 +242,7 @@ const
   RETRO_DEVICE_ID_POINTER_X             = 0;
   RETRO_DEVICE_ID_POINTER_Y             = 1;
   RETRO_DEVICE_ID_POINTER_PRESSED       = 2;
-  {$IF RETRO_VERSION >= 178}
+  {$IF RETRO_VERSION >= 107080}
   RETRO_DEVICE_ID_POINTER_COUNT         = 3;
   {$ENDIF}
 
@@ -266,22 +270,36 @@ type
     RETRO_LANGUAGE_ESPERANTO            = 13,
     RETRO_LANGUAGE_POLISH               = 14,
     RETRO_LANGUAGE_VIETNAMESE           = 15,
-    {$IF RETRO_VERSION >= 171}
+    {$IF RETRO_VERSION >= 107010}
     RETRO_LANGUAGE_ARABIC               = 16,
     {$ENDIF}
-    {$IF RETRO_VERSION >= 176}
+    {$IF RETRO_VERSION >= 107060}
     RETRO_LANGUAGE_GREEK                = 17,
     {$ENDIF}
-    {$IF RETRO_VERSION >= 177}
+    {$IF RETRO_VERSION >= 107070}
     RETRO_LANGUAGE_TURKISH              = 18,
     {$ENDIF}
-    {$IF RETRO_VERSION >= 188}
+    {$IF RETRO_VERSION >= 108080}
     RETRO_LANGUAGE_SLOVAK               = 19,
     {$ENDIF}
-    {$IF RETRO_VERSION >= 189}
+    {$IF RETRO_VERSION >= 108090}
     RETRO_LANGUAGE_PERSIAN              = 20,
     RETRO_LANGUAGE_HEBREW               = 21,
     RETRO_LANGUAGE_ASTURIAN             = 22,
+    {$ENDIF}
+    {$IF RETRO_VERSION >= 109010}
+    RETRO_LANGUAGE_FINNISH              = 23,
+    {$ENDIF}
+    {$IF RETRO_VERSION >= 110000}
+    RETRO_LANGUAGE_INDONESIAN           = 24,
+    RETRO_LANGUAGE_SWEDISH              = 25,
+    RETRO_LANGUAGE_UKRAINIAN            = 26,
+    {$ENDIF}
+    {$IF RETRO_VERSION >= 110002}
+    RETRO_LANGUAGE_CZECH                = 27,
+    {$ENDIF}
+    {$IF RETRO_VERSION >= 110003}
+    RETRO_LANGUAGE_VALENCIAN            = 28,
     {$ENDIF}
     RETRO_LANGUAGE_LAST,
 
@@ -396,7 +414,7 @@ const
   RETROK_x           : TRetro_key       = 120;
   RETROK_y           : TRetro_key       = 121;
   RETROK_z           : TRetro_key       = 122;
-  {$IF RETRO_VERSION >= 171}
+  {$IF RETRO_VERSION >= 107010}
   RETROK_LEFTBRACE   : TRetro_key       = 123;
   RETROK_BAR         : TRetro_key       = 124;
   RETROK_RIGHTBRACE  : TRetro_key       = 125;
@@ -472,7 +490,7 @@ const
   RETROK_POWER       : TRetro_key       = 320;
   RETROK_EURO        : TRetro_key       = 321;
   RETROK_UNDO        : TRetro_key       = 322;
-  {$IF RETRO_VERSION >= 175}
+  {$IF RETRO_VERSION >= 107050}
   RETROK_OEM_102     : TRetro_key       = 323;
   {$ENDIF}
 
@@ -559,7 +577,7 @@ type
     RETROK_x            = 120,
     RETROK_y            = 121,
     RETROK_z            = 122,
-    {$IF RETRO_VERSION >= 171}
+    {$IF RETRO_VERSION >= 107010}
     RETROK_LEFTBRACE    = 123,
     RETROK_BAR          = 124,
     RETROK_RIGHTBRACE   = 125,
@@ -635,7 +653,7 @@ type
     RETROK_POWER        = 320,
     RETROK_EURO         = 321,
     RETROK_UNDO         = 322,
-    {$IF RETRO_VERSION >= 175}
+    {$IF RETRO_VERSION >= 107050}
     RETROK_OEM_102      = 323,
     {$ENDIF}
 
@@ -868,7 +886,10 @@ const
                                                  * Gets an interface which is used by a libretro core to set
                                                  * state of rumble motors in controllers.
                                                  * A strong and weak motor is supported, and they can be
-                                                 * controlled indepedently. }
+                                                 * controlled indepedently.
+                                                 * Should be called from either retro_init() or retro_load_game().
+                                                 * Should not be called from retro_set_environment().
+                                                 * Returns false if rumble functionality is unavailable. }
 
   RETRO_ENVIRONMENT_GET_INPUT_DEVICE_CAPABILITIES = 24; {* uint64_t * --
                                                          * Gets a bitmask telling which device type are expected to be
@@ -1183,7 +1204,7 @@ const
                                                  * It is recomended to do so in retro_set_environment *}
   RETRO_ENVIRONMENT_GET_VFS_INTERFACE = (45 or RETRO_ENVIRONMENT_EXPERIMENTAL);
 
-  {$IF RETRO_VERSION >= 171}
+  {$IF RETRO_VERSION >= 107010}
                                                 {* struct retro_led_interface * --
                                                  * Gets an interface which is used by a libretro core to set
                                                  * state of LEDs.
@@ -1191,7 +1212,7 @@ const
   RETRO_ENVIRONMENT_GET_LED_INTERFACE = (46 or RETRO_ENVIRONMENT_EXPERIMENTAL);
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 172}
+  {$IF RETRO_VERSION >= 107020}
                                                 {* int * --
                                                  * Tells the core if the frontend wants audio or video.
                                                  * If disabled, the frontend will discard the audio or video,
@@ -1235,14 +1256,14 @@ const
   RETRO_ENVIRONMENT_GET_AUDIO_VIDEO_ENABLE = (47 or RETRO_ENVIRONMENT_EXPERIMENTAL);
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 174}
+  {$IF RETRO_VERSION >= 107040}
                                                 {* struct retro_midi_interface ** --
                                                  * Returns a MIDI interface that can be used for raw data I/O.
                                                  *}
   RETRO_ENVIRONMENT_GET_MIDI_INTERFACE = (48 or RETRO_ENVIRONMENT_EXPERIMENTAL);
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 175}
+  {$IF RETRO_VERSION >= 107050}
                                                 {* bool * --
                                                  * Boolean value that indicates whether or not the frontend is in
                                                  * fastforwarding mode.
@@ -1250,7 +1271,7 @@ const
   RETRO_ENVIRONMENT_GET_FASTFORWARDING = (49 or RETRO_ENVIRONMENT_EXPERIMENTAL);
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 177}
+  {$IF RETRO_VERSION >= 107070}
                                                 {* float * --
                                                  * Float value that lets us know what target refresh rate
                                                  * is curently in use by the frontend.
@@ -1261,7 +1282,7 @@ const
   RETRO_ENVIRONMENT_GET_TARGET_REFRESH_RATE = (50 or RETRO_ENVIRONMENT_EXPERIMENTAL);
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 178}
+  {$IF RETRO_VERSION >= 107080}
                                                 {* bool * --
                                                  * Boolean value that indicates whether or not the frontend supports
                                                  * input bitmasks being returned by retro_input_state_t. The advantage
@@ -1290,6 +1311,13 @@ const
                                                  * retro_core_option_definition structs to RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL.
                                                  * This allows the core to additionally set option sublabel information
                                                  * and/or provide localisation support.
+                                                 *
+                                                 * If version is >= 2, core options may instead be set by passing
+                                                 * a retro_core_options_v2 struct to RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2,
+                                                 * or an array of retro_core_options_v2 structs to
+                                                 * RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2_INTL. This allows the core
+                                                 * to additionally set optional core option category information
+                                                 * for frontends with core option category support.
                                                  *}
   RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION = 52;
 
@@ -1364,6 +1392,7 @@ const
                                                  * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
                                                  * returns an API version of >= 1.
                                                  * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
+                                                 * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.
                                                  * This should be called the first time as early as
                                                  * possible (ideally in retro_set_environment).
                                                  * Afterwards it may be called again for the core to communicate
@@ -1415,7 +1444,7 @@ const
   RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY = 55;
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 180}
+  {$IF RETRO_VERSION >= 108000}
                                                 {* unsigned * --
                                                  *
                                                  * Allows an implementation to ask frontend preferred hardware
@@ -1427,7 +1456,7 @@ const
   RETRO_ENVIRONMENT_GET_PREFERRED_HW_RENDER = 56;
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 185}
+  {$IF RETRO_VERSION >= 108050}
                                                 {* unsigned * --
                                                  * Unsigned value is the API version number of the disk control
                                                  * interface supported by the frontend. If callback return false,
@@ -1460,7 +1489,7 @@ const
   RETRO_ENVIRONMENT_SET_DISK_CONTROL_EXT_INTERFACE = 58;
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 188}
+  {$IF RETRO_VERSION >= 108080}
                                                 {* unsigned * --
                                                  * Unsigned value is the API version number of the message
                                                  * interface supported by the frontend. If callback returns
@@ -1492,7 +1521,7 @@ const
   RETRO_ENVIRONMENT_SET_MESSAGE_EXT = 60;
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 190}
+  {$IF RETRO_VERSION >= 109010}
                                                 {* unsigned * --
                                                  * Unsigned value is the number of active input devices
                                                  * provided by the frontend. This may change between
@@ -1506,6 +1535,412 @@ const
                                                  * should be considered active.
                                                  *}
   RETRO_ENVIRONMENT_GET_INPUT_MAX_USERS = 61;
+
+                                                {* const struct retro_audio_buffer_status_callback * --
+                                                 * Lets the core know the occupancy level of the frontend
+                                                 * audio buffer. Can be used by a core to attempt frame
+                                                 * skipping in order to avoid buffer under-runs.
+                                                 * A core may pass NULL to disable buffer status reporting
+                                                 * in the frontend. }
+  RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK = 62;
+
+                                                {* const unsigned * --
+                                                 * Sets minimum frontend audio latency in milliseconds.
+                                                 * Resultant audio latency may be larger than set value,
+                                                 * or smaller if a hardware limit is encountered. A frontend
+                                                 * is expected to honour requests up to 512 ms.
+                                                 *
+                                                 * - If value is less than current frontend
+                                                 *   audio latency, callback has no effect
+                                                 * - If value is zero, default frontend audio
+                                                 *   latency is set
+                                                 *
+                                                 * May be used by a core to increase audio latency and
+                                                 * therefore decrease the probability of buffer under-runs
+                                                 * (crackling) when performing 'intensive' operations.
+                                                 * A core utilising RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK
+                                                 * to implement audio-buffer-based frame skipping may achieve
+                                                 * optimal results by setting the audio latency to a 'high'
+                                                 * (typically 6x or 8x) integer multiple of the expected
+                                                 * frame time.
+                                                 *
+                                                 * WARNING: This can only be called from within retro_run().
+                                                 * Calling this can require a full reinitialization of audio
+                                                 * drivers in the frontend, so it is important to call it very
+                                                 * sparingly, and usually only with the users explicit consent.
+                                                 * An eventual driver reinitialize will happen so that audio
+                                                 * callbacks happening after this call within the same retro_run()
+                                                 * call will target the newly initialized driver. }
+  RETRO_ENVIRONMENT_SET_MINIMUM_AUDIO_LATENCY = 63;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 109030}
+                                                {* const struct retro_fastforwarding_override * --
+                                                 * Used by a libretro core to override the current
+                                                 * fastforwarding mode of the frontend.
+                                                 * If NULL is passed to this function, the frontend
+                                                 * will return true if fastforwarding override
+                                                 * functionality is supported (no change in
+                                                 * fastforwarding state will occur in this case). }
+  RETRO_ENVIRONMENT_SET_FASTFORWARDING_OVERRIDE = 64;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 109050}
+                                                {* const struct retro_system_content_info_override * --
+                                                 * Allows an implementation to override 'global' content
+                                                 * info parameters reported by retro_get_system_info().
+                                                 * Overrides also affect subsystem content info parameters
+                                                 * set via RETRO_ENVIRONMENT_SET_SUBSYSTEM_INFO.
+                                                 * This function must be called inside retro_set_environment().
+                                                 * If callback returns false, content info overrides
+                                                 * are unsupported by the frontend, and will be ignored.
+                                                 * If callback returns true, extended game info may be
+                                                 * retrieved by calling RETRO_ENVIRONMENT_GET_GAME_INFO_EXT
+                                                 * in retro_load_game() or retro_load_game_special().
+                                                 *
+                                                 * 'data' points to an array of retro_system_content_info_override
+                                                 * structs terminated by a { NULL, false, false } element.
+                                                 * If 'data' is NULL, no changes will be made to the frontend;
+                                                 * a core may therefore pass NULL in order to test whether
+                                                 * the RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE and
+                                                 * RETRO_ENVIRONMENT_GET_GAME_INFO_EXT callbacks are supported
+                                                 * by the frontend.
+                                                 *
+                                                 * For struct member descriptions, see the definition of
+                                                 * struct retro_system_content_info_override.
+                                                 *
+                                                 * Example:
+                                                 *
+                                                 * - struct retro_system_info:
+                                                 * {
+                                                 *    "My Core",                      // library_name
+                                                 *    "v1.0",                         // library_version
+                                                 *    "m3u|md|cue|iso|chd|sms|gg|sg", // valid_extensions
+                                                 *    true,                           // need_fullpath
+                                                 *    false                           // block_extract
+                                                 * }
+                                                 *
+                                                 * - Array of struct retro_system_content_info_override:
+                                                 * {
+                                                 *    {
+                                                 *       "md|sms|gg", // extensions
+                                                 *       false,       // need_fullpath
+                                                 *       true         // persistent_data
+                                                 *    },
+                                                 *    {
+                                                 *       "sg",        // extensions
+                                                 *       false,       // need_fullpath
+                                                 *       false        // persistent_data
+                                                 *    },
+                                                 *    { NULL, false, false }
+                                                 * }
+                                                 *
+                                                 * Result:
+                                                 * - Files of type m3u, cue, iso, chd will not be
+                                                 *   loaded by the frontend. Frontend will pass a
+                                                 *   valid path to the core, and core will handle
+                                                 *   loading internally
+                                                 * - Files of type md, sms, gg will be loaded by
+                                                 *   the frontend. A valid memory buffer will be
+                                                 *   passed to the core. This memory buffer will
+                                                 *   remain valid until retro_deinit() returns
+                                                 * - Files of type sg will be loaded by the frontend.
+                                                 *   A valid memory buffer will be passed to the core.
+                                                 *   This memory buffer will remain valid until
+                                                 *   retro_load_game() (or retro_load_game_special())
+                                                 *   returns
+                                                 *
+                                                 * NOTE: If an extension is listed multiple times in
+                                                 * an array of retro_system_content_info_override
+                                                 * structs, only the first instance will be registered }
+  RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE = 65;
+
+                                                {* const struct retro_game_info_ext ** --
+                                                 * Allows an implementation to fetch extended game
+                                                 * information, providing additional content path
+                                                 * and memory buffer status details.
+                                                 * This function may only be called inside
+                                                 * retro_load_game() or retro_load_game_special().
+                                                 * If callback returns false, extended game information
+                                                 * is unsupported by the frontend. In this case, only
+                                                 * regular retro_game_info will be available.
+                                                 * RETRO_ENVIRONMENT_GET_GAME_INFO_EXT is guaranteed
+                                                 * to return true if RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE
+                                                 * returns true.
+                                                 *
+                                                 * 'data' points to an array of retro_game_info_ext structs.
+                                                 *
+                                                 * For struct member descriptions, see the definition of
+                                                 * struct retro_game_info_ext.
+                                                 *
+                                                 * - If function is called inside retro_load_game(),
+                                                 *   the retro_game_info_ext array is guaranteed to
+                                                 *   have a size of 1 - i.e. the returned pointer may
+                                                 *   be used to access directly the members of the
+                                                 *   first retro_game_info_ext struct, for example:
+                                                 *
+                                                 *      struct retro_game_info_ext *game_info_ext;
+                                                 *      if (environ_cb(RETRO_ENVIRONMENT_GET_GAME_INFO_EXT, &game_info_ext))
+                                                 *         printf("Content Directory: %s\n", game_info_ext->dir);
+                                                 *
+                                                 * - If the function is called inside retro_load_game_special(),
+                                                 *   the retro_game_info_ext array is guaranteed to have a
+                                                 *   size equal to the num_info argument passed to
+                                                 *   retro_load_game_special() }
+  RETRO_ENVIRONMENT_GET_GAME_INFO_EXT = 66;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 109080}
+																							  {* const struct retro_core_options_v2 * --
+																							   * Allows an implementation to signal the environment
+																							   * which variables it might want to check for later using
+																							   * GET_VARIABLE.
+																							   * This allows the frontend to present these variables to
+																							   * a user dynamically.
+																							   * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
+																							   * returns an API version of >= 2.
+																							   * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
+																							   * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.
+																							   * This should be called the first time as early as
+																							   * possible (ideally in retro_set_environment).
+																							   * Afterwards it may be called again for the core to communicate
+																							   * updated options to the frontend, but the number of core
+																							   * options must not change from the number in the initial call.
+																							   * If RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION returns an API
+																							   * version of >= 2, this callback is guaranteed to succeed
+																							   * (i.e. callback return value does not indicate success)
+																							   * If callback returns true, frontend has core option category
+																							   * support.
+																							   * If callback returns false, frontend does not have core option
+																							   * category support.
+																							   *
+																							   * 'data' points to a retro_core_options_v2 struct, containing
+																							   * of two pointers:
+																							   * - retro_core_options_v2::categories is an array of
+																							   *   retro_core_option_v2_category structs terminated by a
+																							   *   { NULL, NULL, NULL } element. If retro_core_options_v2::categories
+																							   *   is NULL, all core options will have no category and will be shown
+																							   *   at the top level of the frontend core option interface. If frontend
+																							   *   does not have core option category support, categories array will
+																							   *   be ignored.
+																							   * - retro_core_options_v2::definitions is an array of
+																							   *   retro_core_option_v2_definition structs terminated by a
+																							   *   { NULL, NULL, NULL, NULL, NULL, NULL, {{0}}, NULL }
+																							   *   element.
+																							   *
+																							   * >> retro_core_option_v2_category notes:
+																							   *
+																							   * - retro_core_option_v2_category::key should contain string
+																							   *   that uniquely identifies the core option category. Valid
+																							   *   key characters are [a-z, A-Z, 0-9, _, -]
+																							   *   Namespace collisions with other implementations' category
+																							   *   keys are permitted.
+																							   * - retro_core_option_v2_category::desc should contain a human
+																							   *   readable description of the category key.
+																							   * - retro_core_option_v2_category::info should contain any
+																							   *   additional human readable information text that a typical
+																							   *   user may need to understand the nature of the core option
+																							   *   category.
+																							   *
+																							   * Example entry:
+																							   * {
+																							   *     "advanced_settings",
+																							   *     "Advanced",
+																							   *     "Options affecting low-level emulation performance and accuracy."
+																							   * }
+																							   *
+																							   * >> retro_core_option_v2_definition notes:
+																							   *
+																							   * - retro_core_option_v2_definition::key should be namespaced to not
+																							   *   collide with other implementations' keys. e.g. A core called
+																							   *   'foo' should use keys named as 'foo_option'. Valid key characters
+																							   *   are [a-z, A-Z, 0-9, _, -].
+																							   * - retro_core_option_v2_definition::desc should contain a human readable
+																							   *   description of the key. Will be used when the frontend does not
+																							   *   have core option category support. Examples: "Aspect Ratio" or
+																							   *   "Video > Aspect Ratio".
+																							   * - retro_core_option_v2_definition::desc_categorized should contain a
+																							   *   human readable description of the key, which will be used when
+																							   *   frontend has core option category support. Example: "Aspect Ratio",
+																							   *   where associated retro_core_option_v2_category::desc is "Video".
+																							   *   If empty or NULL, the string specified by
+																							   *   retro_core_option_v2_definition::desc will be used instead.
+																							   *   retro_core_option_v2_definition::desc_categorized will be ignored
+																							   *   if retro_core_option_v2_definition::category_key is empty or NULL.
+																							   * - retro_core_option_v2_definition::info should contain any additional
+																							   *   human readable information text that a typical user may need to
+																							   *   understand the functionality of the option.
+																							   * - retro_core_option_v2_definition::info_categorized should contain
+																							   *   any additional human readable information text that a typical user
+																							   *   may need to understand the functionality of the option, and will be
+																							   *   used when frontend has core option category support. This is provided
+																							   *   to accommodate the case where info text references an option by
+																							   *   name/desc, and the desc/desc_categorized text for that option differ.
+																							   *   If empty or NULL, the string specified by
+																							   *   retro_core_option_v2_definition::info will be used instead.
+																							   *   retro_core_option_v2_definition::info_categorized will be ignored
+																							   *   if retro_core_option_v2_definition::category_key is empty or NULL.
+																							   * - retro_core_option_v2_definition::category_key should contain a
+																							   *   category identifier (e.g. "video" or "audio") that will be
+																							   *   assigned to the core option if frontend has core option category
+																							   *   support. A categorized option will be shown in a subsection/
+																							   *   submenu of the frontend core option interface. If key is empty
+																							   *   or NULL, or if key does not match one of the
+																							   *   retro_core_option_v2_category::key values in the associated
+																							   *   retro_core_option_v2_category array, option will have no category
+																							   *   and will be shown at the top level of the frontend core option
+																							   *   interface.
+																							   * - retro_core_option_v2_definition::values is an array of
+																							   *   retro_core_option_value structs terminated by a { NULL, NULL }
+																							   *   element.
+																							   * --> retro_core_option_v2_definition::values[index].value is an
+																							   *     expected option value.
+																							   * --> retro_core_option_v2_definition::values[index].label is a
+																							   *     human readable label used when displaying the value on screen.
+																							   *     If NULL, the value itself is used.
+																							   * - retro_core_option_v2_definition::default_value is the default
+																							   *   core option setting. It must match one of the expected option
+																							   *   values in the retro_core_option_v2_definition::values array. If
+																							   *   it does not, or the default value is NULL, the first entry in the
+																							   *   retro_core_option_v2_definition::values array is treated as the
+																							   *   default.
+																							   *
+																							   * The number of possible option values should be very limited,
+																							   * and must be less than RETRO_NUM_CORE_OPTION_VALUES_MAX.
+																							   * i.e. it should be feasible to cycle through options
+																							   * without a keyboard.
+																							   *
+																							   * Example entries:
+																							   *
+																							   * - Uncategorized:
+																							   *
+																							   * {
+																							   *     "foo_option",
+																							   *     "Speed hack coprocessor X",
+																							   *     NULL,
+																							   *     "Provides increased performance at the expense of reduced accuracy.",
+																							   *     NULL,
+																							   *     NULL,
+																							   * 	  {
+																							   *         { "false",    NULL },
+																							   *         { "true",     NULL },
+																							   *         { "unstable", "Turbo (Unstable)" },
+																							   *         { NULL, NULL },
+																							   *     },
+																							   *     "false"
+																							   * }
+																							   *
+																							   * - Categorized:
+																							   *
+																							   * {
+																							   *     "foo_option",
+																							   *     "Advanced > Speed hack coprocessor X",
+																							   *     "Speed hack coprocessor X",
+																							   *     "Setting 'Advanced > Speed hack coprocessor X' to 'true' or 'Turbo' provides increased performance at the expense of reduced accuracy",
+																							   *     "Setting 'Speed hack coprocessor X' to 'true' or 'Turbo' provides increased performance at the expense of reduced accuracy",
+																							   *     "advanced_settings",
+																							   * 	  {
+																							   *         { "false",    NULL },
+																							   *         { "true",     NULL },
+																							   *         { "unstable", "Turbo (Unstable)" },
+																							   *         { NULL, NULL },
+																							   *     },
+																							   *     "false"
+																							   * }
+																							   *
+																							   * Only strings are operated on. The possible values will
+																							   * generally be displayed and stored as-is by the frontend. }
+  RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2 = 67;
+
+																							  {* const struct retro_core_options_v2_intl * --
+																							   * Allows an implementation to signal the environment
+																							   * which variables it might want to check for later using
+																							   * GET_VARIABLE.
+																							   * This allows the frontend to present these variables to
+																							   * a user dynamically.
+																							   * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
+																							   * returns an API version of >= 2.
+																							   * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
+																							   * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.
+																							   * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL.
+																							   * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2.
+																							   * This should be called the first time as early as
+																							   * possible (ideally in retro_set_environment).
+																							   * Afterwards it may be called again for the core to communicate
+																							   * updated options to the frontend, but the number of core
+																							   * options must not change from the number in the initial call.
+																							   * If RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION returns an API
+																							   * version of >= 2, this callback is guaranteed to succeed
+																							   * (i.e. callback return value does not indicate success)
+																							   * If callback returns true, frontend has core option category
+																							   * support.
+																							   * If callback returns false, frontend does not have core option
+																							   * category support.
+																							   *
+																							   * This is fundamentally the same as RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2,
+																							   * with the addition of localisation support. The description of the
+																							   * RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2 callback should be consulted
+																							   * for further details.
+																							   *
+																							   * 'data' points to a retro_core_options_v2_intl struct.
+																							   *
+																							   * - retro_core_options_v2_intl::us is a pointer to a
+																							   *   retro_core_options_v2 struct defining the US English
+																							   *   core options implementation. It must point to a valid struct.
+																							   *
+																							   * - retro_core_options_v2_intl::local is a pointer to a
+																							   *   retro_core_options_v2 struct defining core options for
+																							   *   the current frontend language. It may be NULL (in which case
+																							   *   retro_core_options_v2_intl::us is used by the frontend). Any items
+																							   *   missing from this struct will be read from
+																							   *   retro_core_options_v2_intl::us instead.
+																							   *
+																							   * NOTE: Default core option values are always taken from the
+																							   * retro_core_options_v2_intl::us struct. Any default values in
+																							   * the retro_core_options_v2_intl::local struct will be ignored. }
+  RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2_INTL = 68;
+
+                                                {* const struct retro_core_options_update_display_callback * --
+                                                 * Allows a frontend to signal that a core must update
+                                                 * the visibility of any dynamically hidden core options,
+                                                 * and enables the frontend to detect visibility changes.
+                                                 * Used by the frontend to update the menu display status
+                                                 * of core options without requiring a call of retro_run().
+                                                 * Must be called in retro_set_environment(). }
+  RETRO_ENVIRONMENT_SET_CORE_OPTIONS_UPDATE_DISPLAY_CALLBACK = 69;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 109110}
+		                                            {* const struct retro_variable * --
+		                                             * Allows an implementation to notify the frontend
+		                                             * that a core option value has changed.
+		                                             *
+		                                             * retro_variable::key and retro_variable::value
+		                                             * must match strings that have been set previously
+		                                             * via one of the following:
+		                                             *
+		                                             * - RETRO_ENVIRONMENT_SET_VARIABLES
+		                                             * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS
+		                                             * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL
+		                                             * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2
+		                                             * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2_INTL
+		                                             *
+		                                             * After changing a core option value via this
+		                                             * callback, RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE
+		                                             * will return true.
+		                                             *
+		                                             * If data is NULL, no changes will be registered
+		                                             * and the callback will return true; an
+		                                             * implementation may therefore pass NULL in order
+		                                             * to test whether the callback is supported. }
+  RETRO_ENVIRONMENT_SET_VARIABLE = 70;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 109120}
+                                                {* struct retro_throttle_state * --
+                                                 * Allows an implementation to get details on the actual rate
+                                                 * the frontend is attempting to call retro_run(). }
+  RETRO_ENVIRONMENT_GET_THROTTLE_STATE = (71 or RETRO_ENVIRONMENT_EXPERIMENTAL);
   {$ENDIF}
 
   {* VFS functionality *}
@@ -1532,7 +1967,7 @@ type
   TRetro_vfs_file_handle = packed record end;
   PRetro_vfs_file_handle = ^TRetro_vfs_file_handle;
 
-  {$IF RETRO_VERSION >= 176}
+  {$IF RETRO_VERSION >= 107060}
   {* Opaque dir handle
    * Introduced in VFS API v3 *}
   TRetro_vfs_dir_handle = packed record end;
@@ -1561,7 +1996,7 @@ const
   RETRO_VFS_SEEK_POSITION_CURRENT = 1;
   RETRO_VFS_SEEK_POSITION_END     = 2;
 
-  {$IF RETRO_VERSION >= 176}
+  {$IF RETRO_VERSION >= 107060}
   {* stat() result flags
    * Introduced in VFS API v3 *}
   RETRO_VFS_STAT_IS_VALID             = (1 shl 0);
@@ -1589,7 +2024,7 @@ type
    * Introduced in VFS API v1 *}
   TRetro_vfs_size_t = function(stream: PRetro_vfs_file_handle): cint64; RETRO_CALLCONV;
 
-  {$IF RETRO_VERSION >= 174}
+  {$IF RETRO_VERSION >= 107040}
   {* Truncate file to specified size. Returns 0 on success or -1 on error
    * Introduced in VFS API v2 *}
   TRetro_vfs_truncate_t = function(stream: PRetro_vfs_file_handle; length: cint64): cint64; RETRO_CALLCONV;
@@ -1623,7 +2058,7 @@ type
    * Introduced in VFS API v1 *}
   TRetro_vfs_rename_t = function(const old_path, new_path: PChar): cint; RETRO_CALLCONV;
 
-  {$IF RETRO_VERSION >= 176}
+  {$IF RETRO_VERSION >= 107060}
   {* Stat the specified file. Retruns a bitmask of RETRO_VFS_STAT_* flags, none are set if path was not valid.
    * Additionally stores file size in given variable, unless NULL is given.
    * Introduced in VFS API v3 *}
@@ -1671,11 +2106,11 @@ type
     flush           : TRetro_vfs_flush_t;
     remove          : TRetro_vfs_remove_t;
     rename          : TRetro_vfs_rename_t;
-    {$IF RETRO_VERSION >= 174}
+    {$IF RETRO_VERSION >= 107040}
     {* VFS API v2 *}
     truncate        : TRetro_vfs_truncate_t;
     {$ENDIF}
-    {$IF RETRO_VERSION >= 176}
+    {$IF RETRO_VERSION >= 107060}
     {* VFS API v3 *}
     stat            : TRetro_vfs_stat_t;
     mkdir           : TRetro_vfs_mkdir_t;
@@ -1703,18 +2138,18 @@ type
 
   TRetro_hw_render_interface_type = (
     RETRO_HW_RENDER_INTERFACE_VULKAN    = 0,
-    {$IF RETRO_VERSION >= 172}
+    {$IF RETRO_VERSION >= 107020}
     RETRO_HW_RENDER_INTERFACE_D3D9      = 1,
     {$ENDIF}
     RETRO_HW_RENDER_INTERFACE_D3D10     = 2,
-    {$IF RETRO_VERSION >= 172}
+    {$IF RETRO_VERSION >= 107020}
     RETRO_HW_RENDER_INTERFACE_D3D11     = 3,
     RETRO_HW_RENDER_INTERFACE_D3D12     = 4,
     {$ENDIF}
-    {$IF RETRO_VERSION >= 176}
+    {$IF RETRO_VERSION >= 107060}
     RETRO_HW_RENDER_INTERFACE_GSKIT_PS2 = 5,
     {$ENDIF}
-    {$IF RETRO_VERSION >= 172}
+    {$IF RETRO_VERSION >= 107020}
     RETRO_HW_RENDER_INTERFACE_DUMMY     = MaxInt
     {$ENDIF}
   );
@@ -1728,7 +2163,7 @@ type
   end;
   PRetro_hw_render_interface = ^TRetro_hw_render_interface;
 
-  {$IF RETRO_VERSION >= 171}
+  {$IF RETRO_VERSION >= 107010}
   TRetro_set_led_state_t = procedure(led, state: cint); RETRO_CALLCONV;
 
   TRetro_led_interface = packed record
@@ -1737,7 +2172,7 @@ type
   PRetro_led_interface = ^TRetro_led_interface;
   {$ENDIF}
 
-  {$IF RETRO_VERSION >= 174}
+  {$IF RETRO_VERSION >= 107040}
   {* Retrieves the current state of the MIDI input.
    * Returns true if it's enabled, false otherwise. *}
   TRetro_midi_input_enabled_t = function(): cbool; RETRO_CALLCONV;
@@ -1814,7 +2249,7 @@ const
 
   RETRO_MEMDESC_CONST      = (1 shl  0);   {* The frontend will never change this memory area once retro_load_game has returned. *}
   RETRO_MEMDESC_BIGENDIAN  = (1 shl  1);   {* The memory area contains big endian data. Default is little endian. *}
-  {$IF RETRO_VERSION >= 176}
+  {$IF RETRO_VERSION >= 107060}
   RETRO_MEMDESC_SYSTEM_RAM = (1 shl  2);   {* The memory area is system RAM.  This is main RAM of the gaming system. *}
   RETRO_MEMDESC_SAVE_RAM   = (1 shl  3);   {* The memory area is save RAM. This RAM is usually found on a game cartridge, backed up by a battery. *}
   RETRO_MEMDESC_VIDEO_RAM  = (1 shl  4);   {* The memory area is video RAM (VRAM) *}
@@ -2217,7 +2652,7 @@ type
   TRetro_sensor_action = (
     RETRO_SENSOR_ACCELEROMETER_ENABLE = 0,
     RETRO_SENSOR_ACCELEROMETER_DISABLE,
-    {$IF RETRO_VERSION >= 181}
+    {$IF RETRO_VERSION >= 108010}
     RETRO_SENSOR_GYROSCOPE_ENABLE,
     RETRO_SENSOR_GYROSCOPE_DISABLE,
     RETRO_SENSOR_ILLUMINANCE_ENABLE,
@@ -2234,7 +2669,7 @@ const
   RETRO_SENSOR_ACCELEROMETER_X = 0;
   RETRO_SENSOR_ACCELEROMETER_Y = 1;
   RETRO_SENSOR_ACCELEROMETER_Z = 2;
-  {$IF RETRO_VERSION >= 181}
+  {$IF RETRO_VERSION >= 108010}
   RETRO_SENSOR_GYROSCOPE_X = 3;
   RETRO_SENSOR_GYROSCOPE_Y = 4;
   RETRO_SENSOR_GYROSCOPE_Z = 5;
@@ -2422,6 +2857,31 @@ type
   end;
   PRetro_frame_time_callback = ^TRetro_frame_time_callback;
 
+  {$IF RETRO_VERSION >= 109010}
+  {* Notifies a libretro core of the current occupancy
+   * level of the frontend audio buffer.
+   *
+   * - active: 'true' if audio buffer is currently
+   *           in use. Will be 'false' if audio is
+   *           disabled in the frontend
+   *
+   * - occupancy: Given as a value in the range [0,100],
+   *              corresponding to the occupancy percentage
+   *              of the audio buffer
+   *
+   * - underrun_likely: 'true' if the frontend expects an
+   *                    audio buffer underrun during the
+   *                    next frame (indicates that a core
+   *                    should attempt frame skipping)
+   *
+   * It will be called right before retro_run() every frame. *}
+  TRetro_audio_buffer_status_callback_t = procedure(active: cbool; occupancy: cuint; underrun_likely: cbool); RETRO_CALLCONV;
+
+  TRetro_audio_buffer_status_callback = packed record
+    callback: TRetro_audio_buffer_status_callback_t;
+  end;
+  {$ENDIF}
+
 const
 
   {* Pass this to retro_video_refresh_t if rendering to hardware.
@@ -2465,7 +2925,7 @@ type
     {* Vulkan, see RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE. *}
     RETRO_HW_CONTEXT_VULKAN           = 6,
 
-    {$IF RETRO_VERSION >= 172}
+    {$IF RETRO_VERSION >= 107020}
     {* Direct3D, set version_major to select the type of interface
      * returned by RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE *}
     RETRO_HW_CONTEXT_DIRECT3D         = 7,
@@ -2645,7 +3105,7 @@ type
    * with replace_image_index. *}
   TRetro_add_image_index_t = function(): cbool; RETRO_CALLCONV;
 
-  {$IF RETRO_VERSION >= 185}
+  {$IF RETRO_VERSION >= 108050}
   {* Sets initial image to insert in drive when calling
    * core_load_game().
    * Since we cannot pass the initial index when loading
@@ -2704,7 +3164,7 @@ type
   end;
   PRetro_disk_control_callback = ^TRetro_disk_control_callback;
 
-  {$IF RETRO_VERSION >= 185}
+  {$IF RETRO_VERSION >= 108050}
   TRetro_disk_control_ext_callback = packed record
     set_eject_state: TRetro_set_eject_state_t;
     get_eject_state: TRetro_get_eject_state_t;
@@ -2757,7 +3217,7 @@ type
   end;
   PRetro_message = ^TRetro_message;
 
-  {$IF RETRO_VERSION >= 188}
+  {$IF RETRO_VERSION >= 108080}
   TRetro_message_target = (
     RETRO_MESSAGE_TARGET_ALL = 0,
     RETRO_MESSAGE_TARGET_OSD,
@@ -2925,6 +3385,116 @@ type
   end;
   PRetro_system_info = ^TRetro_system_info;
 
+  {$IF RETRO_VERSION >= 109050}
+  {* Defines overrides which modify frontend handling of
+   * specific content file types.
+   * An array of retro_system_content_info_override is
+   * passed to RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE
+   * NOTE: In the following descriptions, references to
+   *       retro_load_game() may be replaced with
+   *       retro_load_game_special() *}
+  TRetro_system_content_info_override = packed record
+     {* A list of file extensions for which the override
+      * should apply, delimited by a 'pipe' character
+      * (e.g. "md|sms|gg")
+      * Permitted file extensions are limited to those
+      * included in retro_system_info::valid_extensions
+      * and/or retro_subsystem_rom_info::valid_extensions *}
+     extensions: pchar;
+
+     {* Overrides the need_fullpath value set in
+      * retro_system_info and/or retro_subsystem_rom_info.
+      * To reiterate:
+      *
+      * If need_fullpath is true and retro_load_game() is called:
+      *    - retro_game_info::path is guaranteed to contain a valid
+      *      path to an existent file
+      *    - retro_game_info::data and retro_game_info::size are invalid
+      *
+      * If need_fullpath is false and retro_load_game() is called:
+      *    - retro_game_info::path may be NULL
+      *    - retro_game_info::data and retro_game_info::size are guaranteed
+      *      to be valid
+      *
+      * In addition:
+      *
+      * If need_fullpath is true and retro_load_game() is called:
+      *    - retro_game_info_ext::full_path is guaranteed to contain a valid
+      *      path to an existent file
+      *    - retro_game_info_ext::archive_path may be NULL
+      *    - retro_game_info_ext::archive_file may be NULL
+      *    - retro_game_info_ext::dir is guaranteed to contain a valid path
+      *      to the directory in which the content file exists
+      *    - retro_game_info_ext::name is guaranteed to contain the
+      *      basename of the content file, without extension
+      *    - retro_game_info_ext::ext is guaranteed to contain the
+      *      extension of the content file in lower case format
+      *    - retro_game_info_ext::data and retro_game_info_ext::size
+      *      are invalid
+      *
+      * If need_fullpath is false and retro_load_game() is called:
+      *    - If retro_game_info_ext::file_in_archive is false:
+      *       - retro_game_info_ext::full_path is guaranteed to contain
+      *         a valid path to an existent file
+      *       - retro_game_info_ext::archive_path may be NULL
+      *       - retro_game_info_ext::archive_file may be NULL
+      *       - retro_game_info_ext::dir is guaranteed to contain a
+      *         valid path to the directory in which the content file exists
+      *       - retro_game_info_ext::name is guaranteed to contain the
+      *         basename of the content file, without extension
+      *       - retro_game_info_ext::ext is guaranteed to contain the
+      *         extension of the content file in lower case format
+      *    - If retro_game_info_ext::file_in_archive is true:
+      *       - retro_game_info_ext::full_path may be NULL
+      *       - retro_game_info_ext::archive_path is guaranteed to
+      *         contain a valid path to an existent compressed file
+      *         inside which the content file is located
+      *       - retro_game_info_ext::archive_file is guaranteed to
+      *         contain a valid path to an existent content file
+      *         inside the compressed file referred to by
+      *         retro_game_info_ext::archive_path
+      *            e.g. for a compressed file '/path/to/foo.zip'
+      *            containing 'bar.sfc'
+      *             > retro_game_info_ext::archive_path will be '/path/to/foo.zip'
+      *             > retro_game_info_ext::archive_file will be 'bar.sfc'
+      *       - retro_game_info_ext::dir is guaranteed to contain a
+      *         valid path to the directory in which the compressed file
+      *         (containing the content file) exists
+      *       - retro_game_info_ext::name is guaranteed to contain
+      *         EITHER
+      *         1) the basename of the compressed file (containing
+      *            the content file), without extension
+      *         OR
+      *         2) the basename of the content file inside the
+      *            compressed file, without extension
+      *         In either case, a core should consider 'name' to
+      *         be the canonical name/ID of the the content file
+      *       - retro_game_info_ext::ext is guaranteed to contain the
+      *         extension of the content file inside the compressed file,
+      *         in lower case format
+      *    - retro_game_info_ext::data and retro_game_info_ext::size are
+      *      guaranteed to be valid *}
+     need_fullpath: cbool;
+
+     {* If need_fullpath is false, specifies whether the content
+      * data buffer available in retro_load_game() is 'persistent'
+      *
+      * If persistent_data is false and retro_load_game() is called:
+      *    - retro_game_info::data and retro_game_info::size
+      *      are valid only until retro_load_game() returns
+      *    - retro_game_info_ext::data and retro_game_info_ext::size
+      *      are valid only until retro_load_game() returns
+      *
+      * If persistent_data is true and retro_load_game() is called:
+      *    - retro_game_info::data and retro_game_info::size
+      *      are valid until retro_deinit() returns
+      *    - retro_game_info_ext::data and retro_game_info_ext::size
+      *      are valid until retro_deinit() returns *}
+     persistent_data: cbool;
+  end;
+  PRetro_system_content_info_override = ^TRetro_system_content_info_override;
+  {$ENDIF}
+
   TRetro_game_geometry = packed record
     base_width: cuint;     {* Nominal video width of game. *}
     base_height: cuint;    {* Nominal video height of game. *}
@@ -2965,7 +3535,7 @@ type
   end;
   PRetro_variable = ^TRetro_variable;
 
-  {$IF RETRO_VERSION >= 178}
+  {$IF RETRO_VERSION >= 107080}
 
 const
 
@@ -3041,6 +3611,146 @@ type
 
   {$ENDIF}
 
+  {$IF RETRO_VERSION >= 109080}
+  TRetro_core_option_v2_category = packed record
+    {* Variable uniquely identifying the
+     * option category. Valid key characters
+     * are [a-z, A-Z, 0-9, _, -] *}
+    key: pchar;
+
+    {* Human-readable category description
+     * > Used as category menu label when
+     *   frontend has core option category
+     *   support *}
+    desc: pchar;
+
+    {* Human-readable category information
+     * > Used as category menu sublabel when
+     *   frontend has core option category
+     *   support
+     * > Optional (may be NULL or an empty
+     *   string) *}
+    info: pchar;
+  end;
+  PRetro_core_option_v2_category = ^TRetro_core_option_v2_category;
+
+  TRetro_core_option_v2_definition = packed record
+    {* Variable to query in RETRO_ENVIRONMENT_GET_VARIABLE.
+     * Valid key characters are [a-z, A-Z, 0-9, _, -] *}
+    key: pchar;
+
+    {* Human-readable core option description
+     * > Used as menu label when frontend does
+     *   not have core option category support
+     *   e.g. "Video > Aspect Ratio" *}
+   desc: pchar;
+
+    {* Human-readable core option description
+     * > Used as menu label when frontend has
+     *   core option category support
+     *   e.g. "Aspect Ratio", where associated
+     *   retro_core_option_v2_category::desc
+     *   is "Video"
+     * > If empty or NULL, the string specified by
+     *   desc will be used as the menu label
+     * > Will be ignored (and may be set to NULL)
+     *   if category_key is empty or NULL *}
+    desc_categorized: pchar;
+
+    {* Human-readable core option information
+     * > Used as menu sublabel *}
+    info: pchar;
+
+    {* Human-readable core option information
+     * > Used as menu sublabel when frontend
+     *   has core option category support
+     *   (e.g. may be required when info text
+     *   references an option by name/desc,
+     *   and the desc/desc_categorized text
+     *   for that option differ)
+     * > If empty or NULL, the string specified by
+     *   info will be used as the menu sublabel
+     * > Will be ignored (and may be set to NULL)
+     *   if category_key is empty or NULL *}
+    info_categorized: pchar;
+
+    {* Variable specifying category (e.g. "video",
+     * "audio") that will be assigned to the option
+     * if frontend has core option category support.
+     * > Categorized options will be displayed in a
+     *   subsection/submenu of the frontend core
+     *   option interface
+     * > Specified string must match one of the
+     *   retro_core_option_v2_category::key values
+     *   in the associated retro_core_option_v2_category
+     *   array; If no match is not found, specified
+     *   string will be considered as NULL
+     * > If specified string is empty or NULL, option will
+     *   have no category and will be shown at the top
+     *   level of the frontend core option interface *}
+    category_key: pchar;
+
+    {* Array of retro_core_option_value structs, terminated by NULL *}
+    values: packed array [0..RETRO_NUM_CORE_OPTION_VALUES_MAX-1] of TRetro_core_option_value;
+
+    {* Default core option value. Must match one of the values
+     * in the retro_core_option_value array, otherwise will be
+     * ignored *}
+    default_value: pchar;
+
+  end;
+  PRetro_core_option_v2_definition = ^TRetro_core_option_v2_definition;
+
+  TRetro_core_options_v2 = packed record
+    {* Array of retro_core_option_v2_category structs,
+     * terminated by NULL
+     * > If NULL, all entries in definitions array
+     *   will have no category and will be shown at
+     *   the top level of the frontend core option
+     *   interface
+     * > Will be ignored if frontend does not have
+     *   core option category support *}
+    categories: PRetro_core_option_v2_category;
+
+    {* Array of retro_core_option_v2_definition structs,
+     * terminated by NULL *}
+    definitions: PRetro_core_option_v2_definition;
+  end;
+  PRetro_core_options_v2 = ^TRetro_core_options_v2;
+
+  TRetro_core_options_v2_intl = packed record
+    {* Pointer to a retro_core_options_v2 struct
+     * > US English implementation
+     * > Must point to a valid struct *}
+    us: PRetro_core_options_v2;
+
+    {* Pointer to a retro_core_options_v2 struct
+     * - Implementation for current frontend language
+     * - May be NULL *}
+    local: PRetro_core_options_v2;
+  end;
+  PRetro_core_options_v2_intl = ^TRetro_core_options_v2_intl;
+
+  {* Used by the frontend to monitor changes in core option
+   * visibility. May be called each time any core option
+   * value is set via the frontend.
+   * - On each invocation, the core must update the visibility
+   *   of any dynamically hidden options using the
+   *   RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY environment
+   *   callback.
+   * - On the first invocation, returns 'true' if the visibility
+   *   of any core option has changed since the last call of
+   *   retro_load_game() or retro_load_game_special().
+   * - On each subsequent invocation, returns 'true' if the
+   *   visibility of any core option has changed since the last
+   *   time the function was called. *}
+  TRetro_core_options_update_display_callback_t = function(): cbool; RETRO_CALLCONV;
+
+  TRetro_core_options_update_display_callback = packed record
+     callback: TRetro_core_options_update_display_callback_t;
+  end;
+  {$ENDIF}
+
 const
 
   RETRO_MEMORY_ACCESS_WRITE = (1 shl 0);      {* The core will write to the buffer provided by retro_framebuffer::data. *}
@@ -3071,6 +3781,85 @@ type
                                          Set by frontend in GET_CURRENT_SOFTWARE_FRAMEBUFFER. *}
   end;
   PRetro_framebuffer = ^TRetro_framebuffer;
+
+  {$IF RETRO_VERSION >= 109030}
+  {* Used by a libretro core to override the current
+   * fastforwarding mode of the frontend *}
+  TRetro_fastforwarding_override = packed record
+    ratio: cfloat;                    {* Specifies the runtime speed multiplier that
+                                       * will be applied when 'fastforward' is true.
+                                       * For example, a value of 5.0 when running 60 FPS
+                                       * content will cap the fast-forward rate at 300 FPS.
+                                       * Note that the target multiplier may not be achieved
+                                       * if the host hardware has insufficient processing
+                                       * power.
+                                       * Setting a value of 0.0 (or greater than 0.0 but
+                                       * less than 1.0) will result in an uncapped
+                                       * fast-forward rate (limited only by hardware
+                                       * capacity).
+                                       * If the value is negative, it will be ignored
+                                       * (i.e. the frontend will use a runtime speed
+                                       * multiplier of its own choosing) *}
+    fastforward: cbool;               {* If true, fastforwarding mode will be enabled.
+                                       * If false, fastforwarding mode will be disabled. *}
+    notification: cbool;              {* If true, and if supported by the frontend, an
+                                       * on-screen notification will be displayed while
+                                       * 'fastforward' is true.
+                                       * If false, and if supported by the frontend, any
+                                       * on-screen fast-forward notifications will be
+                                       * suppressed *}
+    inhibit_toggle: cbool;            {* If true, the core will have sole control over
+                                       * when fastforwarding mode is enabled/disabled;
+                                       * the frontend will not be able to change the
+                                       * state set by 'fastforward' until either
+                                       * 'inhibit_toggle' is set to false, or the core
+                                       * is unloaded *}
+  end;
+  PRetro_fastforwarding_override = ^TRetro_fastforwarding_override;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 109120}
+
+const
+
+  {* During normal operation. Rate will be equal to the core's internal FPS. *}
+  RETRO_THROTTLE_NONE            = 0;
+
+  {* While paused or stepping single frames. Rate will be 0. *}
+  RETRO_THROTTLE_FRAME_STEPPING  = 1;
+
+  {* During fast forwarding.
+   * Rate will be 0 if not specifically limited to a maximum speed. *}
+  RETRO_THROTTLE_FAST_FORWARD    = 2;
+
+  {* During slow motion. Rate will be less than the core's internal FPS. *}
+  RETRO_THROTTLE_SLOW_MOTION     = 3;
+
+  {* While rewinding recorded save states. Rate can vary depending on the rewind
+   * speed or be 0 if the frontend is not aiming for a specific rate. *}
+  RETRO_THROTTLE_REWINDING       = 4;
+
+  {* While vsync is active in the video driver and the target refresh rate is
+   * lower than the core's internal FPS. Rate is the target refresh rate. *}
+  RETRO_THROTTLE_VSYNC           = 5;
+
+  {* When the frontend does not throttle in any way. Rate will be 0.
+   * An example could be if no vsync or audio output is active. *}
+  RETRO_THROTTLE_UNBLOCKED       = 6;
+
+type
+
+  TRetro_throttle_state = packed record
+     {* The current throttling mode. Should be one of the values above. *}
+     mode: cuint;
+
+     {* How many times per second the frontend aims to call retro_run.
+      * Depending on the mode, it can be 0 if there is no known fixed rate.
+      * This won't be accurate if the total processing time of the core and
+      * the frontend is longer than what is available for one frame. *}
+     rate: cfloat;
+  end;
+  {$ENDIF}
 
   {* Callbacks *}
 
