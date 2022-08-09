@@ -13,8 +13,8 @@
 
 {$MACRO ON}
 
-// define libretro header version (minimum v1.70 / maximum 1.90)
-{$DEFINE RETRO_VERSION := 190}
+// define libretro header version, min v1.70 (107000) / max v1.10.03 (110003)
+{$DEFINE RETRO_VERSION := 110003}
 
 // define to include audio
 {$DEFINE RETRO_AUDIO}
@@ -35,8 +35,8 @@
 {$DEFINE RETRO_COLOR}
 
 // define the pixel-format to use (max define 1, none for autoselect)
-{$DEFINE RETRO_COLOR_RGB565}
-{.$DEFINE RETRO_COLOR_XRGB8888}
+{.$DEFINE RETRO_COLOR_RGB565}
+{$DEFINE RETRO_COLOR_XRGB8888}
 
 // define color palettes to include, multi-choice
 {$DEFINE RETRO_COLOR_PALETTE_BIG}    // include * Big color palette
@@ -60,9 +60,14 @@
 {$DEFINE RETRO_CALLCONV := cdecl}
 {$DEFINE RETRO_API := cdecl}
 
+// if too high version defined, set to latest
+{$IF RETRO_VERSION > 110003}
+  {$DEFINE RETRO_VERSION := 110003}
+{$ENDIF}
+
 // if no version defined, set to latest
-{$IF RETRO_VERSION <= 170}
-  {$DEFINE RETRO_VERSION := 190}
+{$IF RETRO_VERSION < 107000}
+  {$DEFINE RETRO_VERSION := 110003}
 {$ENDIF}
 
 // if no color defined, autoselect
