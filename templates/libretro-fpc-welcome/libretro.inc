@@ -13,8 +13,8 @@
 
 {$MACRO ON}
 
-// define libretro header version, min v1.70 (107000) / max v1.10.03 (110003)
-{$DEFINE RETRO_VERSION := 110003}
+// define libretro header version, min v1.70 (107000) / max v1.14 (114000)
+{$DEFINE RETRO_VERSION := 114000}
 
 // define to include audio
 {$DEFINE RETRO_AUDIO}
@@ -61,13 +61,13 @@
 {$DEFINE RETRO_API := cdecl}
 
 // if too high version defined, set to latest
-{$IF RETRO_VERSION > 110003}
-  {$DEFINE RETRO_VERSION := 110003}
+{$IF RETRO_VERSION > 114000}
+  {$DEFINE RETRO_VERSION := 114000}
 {$ENDIF}
 
 // if no version defined, set to latest
 {$IF RETRO_VERSION < 107000}
-  {$DEFINE RETRO_VERSION := 110003}
+  {$DEFINE RETRO_VERSION := 114000}
 {$ENDIF}
 
 // if no color defined, autoselect
