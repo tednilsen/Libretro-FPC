@@ -12,7 +12,7 @@ unit libretro;
 //  - original header:
 //      https://github.com/libretro/RetroArch/blob/master/libretro-common/include/libretro.h
 //
-//  - Header v1.10.3
+//  - Header v1.14
 //    Minimum supported Libretro version are starting from v1.7.0
 //
 //  - Please edit libretro.inc for configuration.
@@ -20,6 +20,10 @@ unit libretro;
 //
 //  Changelog:
 //  ----------
+//
+//  * 2023.01.01
+//    - Happy New Year 2023
+//    - Update to RetroArch v1.14
 //
 //  * 2022.08.07
 //    - Update to RetroArch v1.10.3
@@ -299,7 +303,16 @@ type
     RETRO_LANGUAGE_CZECH                = 27,
     {$ENDIF}
     {$IF RETRO_VERSION >= 110003}
-    RETRO_LANGUAGE_VALENCIAN            = 28,
+    RETRO_LANGUAGE_CATALAN_VALENCIA     = 28,
+    {$ENDIF}
+    {$IF RETRO_VERSION >= 111000}
+    RETRO_LANGUAGE_CATALAN              = 29,
+    {$ENDIF}
+    {$IF RETRO_VERSION >= 112000}
+    RETRO_LANGUAGE_BRITISH_ENGLISH      = 30,
+    {$ENDIF}
+    {$IF RETRO_VERSION >= 113000}
+    RETRO_LANGUAGE_HUNGARIAN            = 31,
     {$ENDIF}
     RETRO_LANGUAGE_LAST,
 
@@ -1691,213 +1704,213 @@ const
   {$ENDIF}
 
   {$IF RETRO_VERSION >= 109080}
-																							  {* const struct retro_core_options_v2 * --
-																							   * Allows an implementation to signal the environment
-																							   * which variables it might want to check for later using
-																							   * GET_VARIABLE.
-																							   * This allows the frontend to present these variables to
-																							   * a user dynamically.
-																							   * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
-																							   * returns an API version of >= 2.
-																							   * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
-																							   * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.
-																							   * This should be called the first time as early as
-																							   * possible (ideally in retro_set_environment).
-																							   * Afterwards it may be called again for the core to communicate
-																							   * updated options to the frontend, but the number of core
-																							   * options must not change from the number in the initial call.
-																							   * If RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION returns an API
-																							   * version of >= 2, this callback is guaranteed to succeed
-																							   * (i.e. callback return value does not indicate success)
-																							   * If callback returns true, frontend has core option category
-																							   * support.
-																							   * If callback returns false, frontend does not have core option
-																							   * category support.
-																							   *
-																							   * 'data' points to a retro_core_options_v2 struct, containing
-																							   * of two pointers:
-																							   * - retro_core_options_v2::categories is an array of
-																							   *   retro_core_option_v2_category structs terminated by a
-																							   *   { NULL, NULL, NULL } element. If retro_core_options_v2::categories
-																							   *   is NULL, all core options will have no category and will be shown
-																							   *   at the top level of the frontend core option interface. If frontend
-																							   *   does not have core option category support, categories array will
-																							   *   be ignored.
-																							   * - retro_core_options_v2::definitions is an array of
-																							   *   retro_core_option_v2_definition structs terminated by a
-																							   *   { NULL, NULL, NULL, NULL, NULL, NULL, {{0}}, NULL }
-																							   *   element.
-																							   *
-																							   * >> retro_core_option_v2_category notes:
-																							   *
-																							   * - retro_core_option_v2_category::key should contain string
-																							   *   that uniquely identifies the core option category. Valid
-																							   *   key characters are [a-z, A-Z, 0-9, _, -]
-																							   *   Namespace collisions with other implementations' category
-																							   *   keys are permitted.
-																							   * - retro_core_option_v2_category::desc should contain a human
-																							   *   readable description of the category key.
-																							   * - retro_core_option_v2_category::info should contain any
-																							   *   additional human readable information text that a typical
-																							   *   user may need to understand the nature of the core option
-																							   *   category.
-																							   *
-																							   * Example entry:
-																							   * {
-																							   *     "advanced_settings",
-																							   *     "Advanced",
-																							   *     "Options affecting low-level emulation performance and accuracy."
-																							   * }
-																							   *
-																							   * >> retro_core_option_v2_definition notes:
-																							   *
-																							   * - retro_core_option_v2_definition::key should be namespaced to not
-																							   *   collide with other implementations' keys. e.g. A core called
-																							   *   'foo' should use keys named as 'foo_option'. Valid key characters
-																							   *   are [a-z, A-Z, 0-9, _, -].
-																							   * - retro_core_option_v2_definition::desc should contain a human readable
-																							   *   description of the key. Will be used when the frontend does not
-																							   *   have core option category support. Examples: "Aspect Ratio" or
-																							   *   "Video > Aspect Ratio".
-																							   * - retro_core_option_v2_definition::desc_categorized should contain a
-																							   *   human readable description of the key, which will be used when
-																							   *   frontend has core option category support. Example: "Aspect Ratio",
-																							   *   where associated retro_core_option_v2_category::desc is "Video".
-																							   *   If empty or NULL, the string specified by
-																							   *   retro_core_option_v2_definition::desc will be used instead.
-																							   *   retro_core_option_v2_definition::desc_categorized will be ignored
-																							   *   if retro_core_option_v2_definition::category_key is empty or NULL.
-																							   * - retro_core_option_v2_definition::info should contain any additional
-																							   *   human readable information text that a typical user may need to
-																							   *   understand the functionality of the option.
-																							   * - retro_core_option_v2_definition::info_categorized should contain
-																							   *   any additional human readable information text that a typical user
-																							   *   may need to understand the functionality of the option, and will be
-																							   *   used when frontend has core option category support. This is provided
-																							   *   to accommodate the case where info text references an option by
-																							   *   name/desc, and the desc/desc_categorized text for that option differ.
-																							   *   If empty or NULL, the string specified by
-																							   *   retro_core_option_v2_definition::info will be used instead.
-																							   *   retro_core_option_v2_definition::info_categorized will be ignored
-																							   *   if retro_core_option_v2_definition::category_key is empty or NULL.
-																							   * - retro_core_option_v2_definition::category_key should contain a
-																							   *   category identifier (e.g. "video" or "audio") that will be
-																							   *   assigned to the core option if frontend has core option category
-																							   *   support. A categorized option will be shown in a subsection/
-																							   *   submenu of the frontend core option interface. If key is empty
-																							   *   or NULL, or if key does not match one of the
-																							   *   retro_core_option_v2_category::key values in the associated
-																							   *   retro_core_option_v2_category array, option will have no category
-																							   *   and will be shown at the top level of the frontend core option
-																							   *   interface.
-																							   * - retro_core_option_v2_definition::values is an array of
-																							   *   retro_core_option_value structs terminated by a { NULL, NULL }
-																							   *   element.
-																							   * --> retro_core_option_v2_definition::values[index].value is an
-																							   *     expected option value.
-																							   * --> retro_core_option_v2_definition::values[index].label is a
-																							   *     human readable label used when displaying the value on screen.
-																							   *     If NULL, the value itself is used.
-																							   * - retro_core_option_v2_definition::default_value is the default
-																							   *   core option setting. It must match one of the expected option
-																							   *   values in the retro_core_option_v2_definition::values array. If
-																							   *   it does not, or the default value is NULL, the first entry in the
-																							   *   retro_core_option_v2_definition::values array is treated as the
-																							   *   default.
-																							   *
-																							   * The number of possible option values should be very limited,
-																							   * and must be less than RETRO_NUM_CORE_OPTION_VALUES_MAX.
-																							   * i.e. it should be feasible to cycle through options
-																							   * without a keyboard.
-																							   *
-																							   * Example entries:
-																							   *
-																							   * - Uncategorized:
-																							   *
-																							   * {
-																							   *     "foo_option",
-																							   *     "Speed hack coprocessor X",
-																							   *     NULL,
-																							   *     "Provides increased performance at the expense of reduced accuracy.",
-																							   *     NULL,
-																							   *     NULL,
-																							   * 	  {
-																							   *         { "false",    NULL },
-																							   *         { "true",     NULL },
-																							   *         { "unstable", "Turbo (Unstable)" },
-																							   *         { NULL, NULL },
-																							   *     },
-																							   *     "false"
-																							   * }
-																							   *
-																							   * - Categorized:
-																							   *
-																							   * {
-																							   *     "foo_option",
-																							   *     "Advanced > Speed hack coprocessor X",
-																							   *     "Speed hack coprocessor X",
-																							   *     "Setting 'Advanced > Speed hack coprocessor X' to 'true' or 'Turbo' provides increased performance at the expense of reduced accuracy",
-																							   *     "Setting 'Speed hack coprocessor X' to 'true' or 'Turbo' provides increased performance at the expense of reduced accuracy",
-																							   *     "advanced_settings",
-																							   * 	  {
-																							   *         { "false",    NULL },
-																							   *         { "true",     NULL },
-																							   *         { "unstable", "Turbo (Unstable)" },
-																							   *         { NULL, NULL },
-																							   *     },
-																							   *     "false"
-																							   * }
-																							   *
-																							   * Only strings are operated on. The possible values will
-																							   * generally be displayed and stored as-is by the frontend. }
+                                                {* const struct retro_core_options_v2 * --
+                                                 * Allows an implementation to signal the environment
+                                                 * which variables it might want to check for later using
+                                                 * GET_VARIABLE.
+                                                 * This allows the frontend to present these variables to
+                                                 * a user dynamically.
+                                                 * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
+                                                 * returns an API version of >= 2.
+                                                 * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
+                                                 * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.
+                                                 * This should be called the first time as early as
+                                                 * possible (ideally in retro_set_environment).
+                                                 * Afterwards it may be called again for the core to communicate
+                                                 * updated options to the frontend, but the number of core
+                                                 * options must not change from the number in the initial call.
+                                                 * If RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION returns an API
+                                                 * version of >= 2, this callback is guaranteed to succeed
+                                                 * (i.e. callback return value does not indicate success)
+                                                 * If callback returns true, frontend has core option category
+                                                 * support.
+                                                 * If callback returns false, frontend does not have core option
+                                                 * category support.
+                                                 *
+                                                 * 'data' points to a retro_core_options_v2 struct, containing
+                                                 * of two pointers:
+                                                 * - retro_core_options_v2::categories is an array of
+                                                 *   retro_core_option_v2_category structs terminated by a
+                                                 *   { NULL, NULL, NULL } element. If retro_core_options_v2::categories
+                                                 *   is NULL, all core options will have no category and will be shown
+                                                 *   at the top level of the frontend core option interface. If frontend
+                                                 *   does not have core option category support, categories array will
+                                                 *   be ignored.
+                                                 * - retro_core_options_v2::definitions is an array of
+                                                 *   retro_core_option_v2_definition structs terminated by a
+                                                 *   { NULL, NULL, NULL, NULL, NULL, NULL, {{0}}, NULL }
+                                                 *   element.
+                                                 *
+                                                 * >> retro_core_option_v2_category notes:
+                                                 *
+                                                 * - retro_core_option_v2_category::key should contain string
+                                                 *   that uniquely identifies the core option category. Valid
+                                                 *   key characters are [a-z, A-Z, 0-9, _, -]
+                                                 *   Namespace collisions with other implementations' category
+                                                 *   keys are permitted.
+                                                 * - retro_core_option_v2_category::desc should contain a human
+                                                 *   readable description of the category key.
+                                                 * - retro_core_option_v2_category::info should contain any
+                                                 *   additional human readable information text that a typical
+                                                 *   user may need to understand the nature of the core option
+                                                 *   category.
+                                                 *
+                                                 * Example entry:
+                                                 * {
+                                                 *     "advanced_settings",
+                                                 *     "Advanced",
+                                                 *     "Options affecting low-level emulation performance and accuracy."
+                                                 * }
+                                                 *
+                                                 * >> retro_core_option_v2_definition notes:
+                                                 *
+                                                 * - retro_core_option_v2_definition::key should be namespaced to not
+                                                 *   collide with other implementations' keys. e.g. A core called
+                                                 *   'foo' should use keys named as 'foo_option'. Valid key characters
+                                                 *   are [a-z, A-Z, 0-9, _, -].
+                                                 * - retro_core_option_v2_definition::desc should contain a human readable
+                                                 *   description of the key. Will be used when the frontend does not
+                                                 *   have core option category support. Examples: "Aspect Ratio" or
+                                                 *   "Video > Aspect Ratio".
+                                                 * - retro_core_option_v2_definition::desc_categorized should contain a
+                                                 *   human readable description of the key, which will be used when
+                                                 *   frontend has core option category support. Example: "Aspect Ratio",
+                                                 *   where associated retro_core_option_v2_category::desc is "Video".
+                                                 *   If empty or NULL, the string specified by
+                                                 *   retro_core_option_v2_definition::desc will be used instead.
+                                                 *   retro_core_option_v2_definition::desc_categorized will be ignored
+                                                 *   if retro_core_option_v2_definition::category_key is empty or NULL.
+                                                 * - retro_core_option_v2_definition::info should contain any additional
+                                                 *   human readable information text that a typical user may need to
+                                                 *   understand the functionality of the option.
+                                                 * - retro_core_option_v2_definition::info_categorized should contain
+                                                 *   any additional human readable information text that a typical user
+                                                 *   may need to understand the functionality of the option, and will be
+                                                 *   used when frontend has core option category support. This is provided
+                                                 *   to accommodate the case where info text references an option by
+                                                 *   name/desc, and the desc/desc_categorized text for that option differ.
+                                                 *   If empty or NULL, the string specified by
+                                                 *   retro_core_option_v2_definition::info will be used instead.
+                                                 *   retro_core_option_v2_definition::info_categorized will be ignored
+                                                 *   if retro_core_option_v2_definition::category_key is empty or NULL.
+                                                 * - retro_core_option_v2_definition::category_key should contain a
+                                                 *   category identifier (e.g. "video" or "audio") that will be
+                                                 *   assigned to the core option if frontend has core option category
+                                                 *   support. A categorized option will be shown in a subsection/
+                                                 *   submenu of the frontend core option interface. If key is empty
+                                                 *   or NULL, or if key does not match one of the
+                                                 *   retro_core_option_v2_category::key values in the associated
+                                                 *   retro_core_option_v2_category array, option will have no category
+                                                 *   and will be shown at the top level of the frontend core option
+                                                 *   interface.
+                                                 * - retro_core_option_v2_definition::values is an array of
+                                                 *   retro_core_option_value structs terminated by a { NULL, NULL }
+                                                 *   element.
+                                                 * --> retro_core_option_v2_definition::values[index].value is an
+                                                 *     expected option value.
+                                                 * --> retro_core_option_v2_definition::values[index].label is a
+                                                 *     human readable label used when displaying the value on screen.
+                                                 *     If NULL, the value itself is used.
+                                                 * - retro_core_option_v2_definition::default_value is the default
+                                                 *   core option setting. It must match one of the expected option
+                                                 *   values in the retro_core_option_v2_definition::values array. If
+                                                 *   it does not, or the default value is NULL, the first entry in the
+                                                 *   retro_core_option_v2_definition::values array is treated as the
+                                                 *   default.
+                                                 *
+                                                 * The number of possible option values should be very limited,
+                                                 * and must be less than RETRO_NUM_CORE_OPTION_VALUES_MAX.
+                                                 * i.e. it should be feasible to cycle through options
+                                                 * without a keyboard.
+                                                 *
+                                                 * Example entries:
+                                                 *
+                                                 * - Uncategorized:
+                                                 *
+                                                 * {
+                                                 *     "foo_option",
+                                                 *     "Speed hack coprocessor X",
+                                                 *     NULL,
+                                                 *     "Provides increased performance at the expense of reduced accuracy.",
+                                                 *     NULL,
+                                                 *     NULL,
+                                                 *    {
+                                                 *         { "false",    NULL },
+                                                 *         { "true",     NULL },
+                                                 *         { "unstable", "Turbo (Unstable)" },
+                                                 *         { NULL, NULL },
+                                                 *     },
+                                                 *     "false"
+                                                 * }
+                                                 *
+                                                 * - Categorized:
+                                                 *
+                                                 * {
+                                                 *     "foo_option",
+                                                 *     "Advanced > Speed hack coprocessor X",
+                                                 *     "Speed hack coprocessor X",
+                                                 *     "Setting 'Advanced > Speed hack coprocessor X' to 'true' or 'Turbo' provides increased performance at the expense of reduced accuracy",
+                                                 *     "Setting 'Speed hack coprocessor X' to 'true' or 'Turbo' provides increased performance at the expense of reduced accuracy",
+                                                 *     "advanced_settings",
+                                                 *    {
+                                                 *         { "false",    NULL },
+                                                 *         { "true",     NULL },
+                                                 *         { "unstable", "Turbo (Unstable)" },
+                                                 *         { NULL, NULL },
+                                                 *     },
+                                                 *     "false"
+                                                 * }
+                                                 *
+                                                 * Only strings are operated on. The possible values will
+                                                 * generally be displayed and stored as-is by the frontend. }
   RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2 = 67;
 
-																							  {* const struct retro_core_options_v2_intl * --
-																							   * Allows an implementation to signal the environment
-																							   * which variables it might want to check for later using
-																							   * GET_VARIABLE.
-																							   * This allows the frontend to present these variables to
-																							   * a user dynamically.
-																							   * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
-																							   * returns an API version of >= 2.
-																							   * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
-																							   * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.
-																							   * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL.
-																							   * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2.
-																							   * This should be called the first time as early as
-																							   * possible (ideally in retro_set_environment).
-																							   * Afterwards it may be called again for the core to communicate
-																							   * updated options to the frontend, but the number of core
-																							   * options must not change from the number in the initial call.
-																							   * If RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION returns an API
-																							   * version of >= 2, this callback is guaranteed to succeed
-																							   * (i.e. callback return value does not indicate success)
-																							   * If callback returns true, frontend has core option category
-																							   * support.
-																							   * If callback returns false, frontend does not have core option
-																							   * category support.
-																							   *
-																							   * This is fundamentally the same as RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2,
-																							   * with the addition of localisation support. The description of the
-																							   * RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2 callback should be consulted
-																							   * for further details.
-																							   *
-																							   * 'data' points to a retro_core_options_v2_intl struct.
-																							   *
-																							   * - retro_core_options_v2_intl::us is a pointer to a
-																							   *   retro_core_options_v2 struct defining the US English
-																							   *   core options implementation. It must point to a valid struct.
-																							   *
-																							   * - retro_core_options_v2_intl::local is a pointer to a
-																							   *   retro_core_options_v2 struct defining core options for
-																							   *   the current frontend language. It may be NULL (in which case
-																							   *   retro_core_options_v2_intl::us is used by the frontend). Any items
-																							   *   missing from this struct will be read from
-																							   *   retro_core_options_v2_intl::us instead.
-																							   *
-																							   * NOTE: Default core option values are always taken from the
-																							   * retro_core_options_v2_intl::us struct. Any default values in
-																							   * the retro_core_options_v2_intl::local struct will be ignored. }
+                                                {* const struct retro_core_options_v2_intl * --
+                                                 * Allows an implementation to signal the environment
+                                                 * which variables it might want to check for later using
+                                                 * GET_VARIABLE.
+                                                 * This allows the frontend to present these variables to
+                                                 * a user dynamically.
+                                                 * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
+                                                 * returns an API version of >= 2.
+                                                 * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
+                                                 * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS.
+                                                 * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL.
+                                                 * This should be called instead of RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2.
+                                                 * This should be called the first time as early as
+                                                 * possible (ideally in retro_set_environment).
+                                                 * Afterwards it may be called again for the core to communicate
+                                                 * updated options to the frontend, but the number of core
+                                                 * options must not change from the number in the initial call.
+                                                 * If RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION returns an API
+                                                 * version of >= 2, this callback is guaranteed to succeed
+                                                 * (i.e. callback return value does not indicate success)
+                                                 * If callback returns true, frontend has core option category
+                                                 * support.
+                                                 * If callback returns false, frontend does not have core option
+                                                 * category support.
+                                                 *
+                                                 * This is fundamentally the same as RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2,
+                                                 * with the addition of localisation support. The description of the
+                                                 * RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2 callback should be consulted
+                                                 * for further details.
+                                                 *
+                                                 * 'data' points to a retro_core_options_v2_intl struct.
+                                                 *
+                                                 * - retro_core_options_v2_intl::us is a pointer to a
+                                                 *   retro_core_options_v2 struct defining the US English
+                                                 *   core options implementation. It must point to a valid struct.
+                                                 *
+                                                 * - retro_core_options_v2_intl::local is a pointer to a
+                                                 *   retro_core_options_v2 struct defining core options for
+                                                 *   the current frontend language. It may be NULL (in which case
+                                                 *   retro_core_options_v2_intl::us is used by the frontend). Any items
+                                                 *   missing from this struct will be read from
+                                                 *   retro_core_options_v2_intl::us instead.
+                                                 *
+                                                 * NOTE: Default core option values are always taken from the
+                                                 * retro_core_options_v2_intl::us struct. Any default values in
+                                                 * the retro_core_options_v2_intl::local struct will be ignored. }
   RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2_INTL = 68;
 
                                                 {* const struct retro_core_options_update_display_callback * --
@@ -1911,28 +1924,28 @@ const
   {$ENDIF}
 
   {$IF RETRO_VERSION >= 109110}
-		                                            {* const struct retro_variable * --
-		                                             * Allows an implementation to notify the frontend
-		                                             * that a core option value has changed.
-		                                             *
-		                                             * retro_variable::key and retro_variable::value
-		                                             * must match strings that have been set previously
-		                                             * via one of the following:
-		                                             *
-		                                             * - RETRO_ENVIRONMENT_SET_VARIABLES
-		                                             * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS
-		                                             * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL
-		                                             * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2
-		                                             * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2_INTL
-		                                             *
-		                                             * After changing a core option value via this
-		                                             * callback, RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE
-		                                             * will return true.
-		                                             *
-		                                             * If data is NULL, no changes will be registered
-		                                             * and the callback will return true; an
-		                                             * implementation may therefore pass NULL in order
-		                                             * to test whether the callback is supported. }
+                                                {* const struct retro_variable * --
+                                                 * Allows an implementation to notify the frontend
+                                                 * that a core option value has changed.
+                                                 *
+                                                 * retro_variable::key and retro_variable::value
+                                                 * must match strings that have been set previously
+                                                 * via one of the following:
+                                                 *
+                                                 * - RETRO_ENVIRONMENT_SET_VARIABLES
+                                                 * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS
+                                                 * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL
+                                                 * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2
+                                                 * - RETRO_ENVIRONMENT_SET_CORE_OPTIONS_V2_INTL
+                                                 *
+                                                 * After changing a core option value via this
+                                                 * callback, RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE
+                                                 * will return true.
+                                                 *
+                                                 * If data is NULL, no changes will be registered
+                                                 * and the callback will return true; an
+                                                 * implementation may therefore pass NULL in order
+                                                 * to test whether the callback is supported. }
   RETRO_ENVIRONMENT_SET_VARIABLE = 70;
   {$ENDIF}
 
@@ -1941,6 +1954,13 @@ const
                                                  * Allows an implementation to get details on the actual rate
                                                  * the frontend is attempting to call retro_run(). }
   RETRO_ENVIRONMENT_GET_THROTTLE_STATE = (71 or RETRO_ENVIRONMENT_EXPERIMENTAL);
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 111000}
+                                                {* int * --
+                                                 * Tells the core about the context the frontend is asking for savestate.
+                                                 * (see enum retro_savestate_context) }
+  RETRO_ENVIRONMENT_GET_SAVESTATE_CONTEXT = (72 or RETRO_ENVIRONMENT_EXPERIMENTAL);
   {$ENDIF}
 
   {* VFS functionality *}
@@ -3210,6 +3230,34 @@ type
     RETRO_PIXEL_FORMAT_UNKNOWN  = MaxInt
   );
   PRetro_pixel_format = ^TRetro_pixel_format;
+
+  {$IF RETRO_VERSION >= 111000}
+  TRetro_savestate_context = (
+    {* Standard savestate written to disk. *}
+    RETRO_SAVESTATE_CONTEXT_NORMAL                 = 0,
+
+    {* Savestate where you are guaranteed that the same instance will load the save state.
+     * You can store internal pointers to code or data.
+     * It's still a full serialization and deserialization, and could be loaded or saved at any time.
+     * It won't be written to disk or sent over the network. *}
+    RETRO_SAVESTATE_CONTEXT_RUNAHEAD_SAME_INSTANCE = 1,
+
+    {* Savestate where you are guaranteed that the same emulator binary will load that savestate.
+     * You can skip anything that would slow down saving or loading state but you can not store internal pointers.
+     * It won't be written to disk or sent over the network.
+     * Example: "Second Instance" runahead *}
+    RETRO_SAVESTATE_CONTEXT_RUNAHEAD_SAME_BINARY   = 2,
+
+    {* Savestate used within a rollback netplay feature.
+     * You should skip anything that would unnecessarily increase bandwidth usage.
+     * It won't be written to disk but it will be sent over the network. *}
+    RETRO_SAVESTATE_CONTEXT_ROLLBACK_NETPLAY       = 3,
+
+    {* Ensure sizeof() == sizeof(int). *}
+    RETRO_SAVESTATE_CONTEXT_UNKNOWN                = MaxInt
+  );
+  PRetro_savestate_context = ^TRetro_savestate_context;
+  {$ENDIF}
 
   TRetro_message = packed record
     msg: PChar;              {* Message to be displayed. *}
