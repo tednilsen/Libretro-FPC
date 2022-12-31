@@ -99,7 +99,7 @@ type
   //=====================================================================================
   TRetro_input_descriptor_Helper = record helper for TRetro_input_descriptor
     procedure     SetInput(const port, device, index, id: cuint; desc: PChar);
-	end;
+  end;
 
   //=====================================================================================
   //  TRetro_system_info_Helper
@@ -201,11 +201,14 @@ const
   );
 
   {$IFDEF RETRO_LANGUAGE}
-  RETRO_LANGUAGE_STR : array [0..23] of string = (
+  RETRO_LANGUAGE_STR : array [0..32] of string = (
     'English', 'Japanese', 'French', 'Spanish', 'German', 'Italian', 'Dutch',
     'Portuguese Brazil', 'Portuguese Portugal', 'Russian', 'Korean', 'Chinese Traditional',
     'Chinese Simplified', 'Esperanto', 'Polish', 'Vietnamese', 'Arabic', 'Greek',
-    'Turkish', 'Slovak', 'Persian', 'Hebrew', 'Asturian', 'Last'
+    'Turkish', 'Slovak', 'Persian', 'Hebrew', 'Asturian',
+    'Finnish', 'Indonesian', 'Swedish', 'Ukrainian', 'Czech',
+    'Catalan Valencia', 'Catalan', 'British English', 'Hungarian',
+    'Last'
   );
   {$ENDIF RETRO_LANGUAGE}
 
@@ -309,4 +312,3 @@ begin
 end;
 
 end.
-
