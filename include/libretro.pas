@@ -12,7 +12,7 @@ unit libretro;
 //  - original header:
 //      https://github.com/libretro/RetroArch/blob/master/libretro-common/include/libretro.h
 //
-//  - Header v1.14
+//  - Header v1.17
 //    Minimum supported Libretro version are starting from v1.7.0
 //
 //  - Please edit libretro.inc for configuration.
@@ -20,6 +20,14 @@ unit libretro;
 //
 //  Changelog:
 //  ----------
+//
+//  * 2024.10.28
+//    - Update to RetroArch v1.17.0
+//    - Added (bugfix) TRetro_game_info_ext record (from v1.9.5)
+//    - Fix: let only RETRO_CALLCONV (procedural types) end with _t:
+//        * TRetro_perf_tick_t renamed TRetro_perf_tick
+//          TRetro_time_t renamed TRetro_time
+//          TRetro_usec_t renamed TRetro_usec
 //
 //  * 2023.01.01
 //    - Happy New Year 2023
@@ -314,10 +322,13 @@ type
     {$IF RETRO_VERSION >= 113000}
     RETRO_LANGUAGE_HUNGARIAN            = 31,
     {$ENDIF}
+    {$IF RETRO_VERSION >= 117000}
+    RETRO_LANGUAGE_BELARUSIAN           = 32,
+    {$ENDIF}
     RETRO_LANGUAGE_LAST,
 
     {* Ensure sizeof(enum) == sizeof(int) *}
-    RETRO_LANGUAGE_DUMMY               = MaxInt
+    RETRO_LANGUAGE_DUMMY                = MaxInt
   );
   PRetro_language = ^TRetro_language;
 
@@ -1963,6 +1974,102 @@ const
   RETRO_ENVIRONMENT_GET_SAVESTATE_CONTEXT = (72 or RETRO_ENVIRONMENT_EXPERIMENTAL);
   {$ENDIF}
 
+  {$IF RETRO_VERSION >= 115000}
+                                                {* struct retro_hw_render_context_negotiation_interface * --
+                                                 * Before calling SET_HW_RNEDER_CONTEXT_NEGOTIATION_INTERFACE, a core can query
+                                                 * which version of the interface is supported.
+                                                 *
+                                                 * Frontend looks at interface_type and returns the maximum supported
+                                                 * context negotiation interface version.
+                                                 * If the interface_type is not supported or recognized by the frontend, a version of 0
+                                                 * must be returned in interface_version and true is returned by frontend.
+                                                 *
+                                                 * If this environment call returns true with interface_version greater than 0,
+                                                 * a core can always use a negotiation interface version larger than what the frontend returns, but only
+                                                 * earlier versions of the interface will be used by the frontend.
+                                                 * A frontend must not reject a negotiation interface version that is larger than
+                                                 * what the frontend supports. Instead, the frontend will use the older entry points that it recognizes.
+                                                 * If this is incompatible with a particular core's requirements, it can error out early.
+                                                 *
+                                                 * Backwards compatibility note:
+                                                 * This environment call was introduced after Vulkan v1 context negotiation.
+                                                 * If this environment call is not supported by frontend - i.e. the environment call returns false -
+                                                 * only Vulkan v1 context negotiation is supported (if Vulkan HW rendering is supported at all).
+                                                 * If a core uses Vulkan negotiation interface with version > 1, negotiation may fail unexpectedly.
+                                                 * All future updates to the context negotiation interface implies that frontend must support
+                                                 * this environment call to query support. }
+  RETRO_ENVIRONMENT_GET_HW_RENDER_CONTEXT_NEGOTIATION_INTERFACE_SUPPORT = (73 or RETRO_ENVIRONMENT_EXPERIMENTAL);
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 116000}
+                                                {* bool * --
+                                                 * Result is set to true if the frontend has already verified JIT can be
+                                                 * used, mainly for use iOS/tvOS. On other platforms the result is true. }
+  RETRO_ENVIRONMENT_GET_JIT_CAPABLE = 74;
+
+                                                {* struct retro_microphone_interface * --
+                                                 * Returns an interface that can be used to receive input from the microphone driver.
+                                                 *
+                                                 * Returns true if microphone support is available,
+                                                 * even if no microphones are plugged in.
+                                                 * Returns false if mic support is disabled or unavailable.
+                                                 *
+                                                 * This callback can be invoked at any time,
+                                                 * even before the microphone driver is ready. }
+  RETRO_ENVIRONMENT_GET_MICROPHONE_INTERFACE = (75 or RETRO_ENVIRONMENT_EXPERIMENTAL);
+
+                                                {* const struct retro_netpacket_callback * --
+                                                 * When set, a core gains control over network packets sent and
+                                                 * received during a multiplayer session. This can be used to
+                                                 * emulate multiplayer games that were originally played on two
+                                                 * or more separate consoles or computers connected together.
+                                                 *
+                                                 * The frontend will take care of connecting players together,
+                                                 * and the core only needs to send the actual data as needed for
+                                                 * the emulation, while handshake and connection management happen
+                                                 * in the background.
+                                                 *
+                                                 * When two or more players are connected and this interface has
+                                                 * been set, time manipulation features (such as pausing, slow motion,
+                                                 * fast forward, rewinding, save state loading, etc.) are disabled to
+                                                 * avoid interrupting communication.
+                                                 *
+                                                 * Should be set in either retro_init or retro_load_game, but not both.
+                                                 *
+                                                 * When not set, a frontend may use state serialization-based
+                                                 * multiplayer, where a deterministic core supporting multiple
+                                                 * input devices does not need to take any action on its own. }
+  RETRO_ENVIRONMENT_SET_NETPACKET_INTERFACE = 76;
+
+                                                {* struct retro_device_power * --
+                                                 * Returns the device's current power state as reported by the frontend.
+                                                 * This is useful for emulating the battery level in handheld consoles,
+                                                 * or for reducing power consumption when on battery power.
+                                                 *
+                                                 * The return value indicates whether the frontend can provide this information,
+                                                 * even if the parameter is NULL.
+                                                 *
+                                                 * If the frontend does not support this functionality,
+                                                 * then the provided argument will remain unchanged.
+                                                 *
+                                                 * Note that this environment call describes the power state for the entire device,
+                                                 * not for individual peripherals like controllers. }
+  RETRO_ENVIRONMENT_GET_DEVICE_POWER = (77 or RETRO_ENVIRONMENT_EXPERIMENTAL);
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 117000}
+                                                {* const char ** --
+                                                 * Returns the "playlist" directory of the frontend.
+                                                 * This directory can be used to store core generated playlists,
+                                                 * in case this internal functionality is available (e.g. internal core
+                                                 * game detection engine).
+                                                 *
+                                                 * The returned value can be NULL.
+                                                 * If so, no such directory is defined,
+                                                 * and it's up to the implementation to find a suitable directory. }
+  RETRO_ENVIRONMENT_GET_PLAYLIST_DIRECTORY = 79;
+  {$ENDIF}
+
   {* VFS functionality *}
 
   {* File paths:
@@ -2178,8 +2285,8 @@ type
   {* Base struct. All retro_hw_render_interface_* types
    * contain at least these fields. *}
   TRetro_hw_render_interface = packed record
-    interface_type: TRetro_hw_render_interface_type;
-    interface_version: cuint;
+    interface_type    : TRetro_hw_render_interface_type;
+    interface_version : cuint;
   end;
   PRetro_hw_render_interface = ^TRetro_hw_render_interface;
 
@@ -2427,8 +2534,8 @@ type
    *}
 
   TRetro_memory_map = packed record
-    descriptors: PRetro_memory_descriptor;
-    num_descriptors: cuint;
+    descriptors     : PRetro_memory_descriptor;
+    num_descriptors : cuint;
   end;
   PRetro_memory_map = ^TRetro_memory_map;
 
@@ -2582,26 +2689,26 @@ const
 
 type
 
-  TRetro_perf_tick_t  = cuint64;
-  TRetro_time_t       = cint64;
+  TRetro_perf_tick = cuint64;
+  TRetro_time      = cint64;
 
   TRetro_perf_counter = packed record
-    ident: PChar;
-    start: TRetro_perf_tick_t;
-    total: TRetro_perf_tick_t;
-    call_cnt: TRetro_perf_tick_t;
-    registered: cbool;
+    ident      : PChar;
+    start      : TRetro_perf_tick;
+    total      : TRetro_perf_tick;
+    call_cnt   : TRetro_perf_tick;
+    registered : cbool;
   end;
   PRetro_perf_counter = ^TRetro_perf_counter;
 
   {* Returns current time in microseconds.
    * Tries to use the most accurate timer available. }
-  TRetro_perf_get_time_usec_t = function(): TRetro_time_t; RETRO_CALLCONV;
+  TRetro_perf_get_time_usec_t = function(): TRetro_time; RETRO_CALLCONV;
 
   {* A simple counter. Usually nanoseconds, but can also be CPU cycles.
    * Can be used directly if desired (when creating a more sophisticated
    * performance counter system). }
-  TRetro_perf_get_counter_t = function(): TRetro_perf_tick_t; RETRO_CALLCONV;
+  TRetro_perf_get_counter_t = function(): TRetro_perf_tick; RETRO_CALLCONV;
 
   {* Returns a bit-mask of detected CPU features (RETRO_SIMD_*). *}
   TRetro_get_cpu_features_t = function(): cuint64; RETRO_CALLCONV;
@@ -2657,13 +2764,13 @@ type
   // */
 
   TRetro_perf_callback = packed record
-    get_time_usec:    TRetro_perf_get_time_usec_t;
-    get_cpu_features: TRetro_get_cpu_features_t;
-    get_perf_counter: TRetro_perf_get_counter_t;
-    perf_register:    TRetro_perf_register_t;
-    perf_start:       TRetro_perf_start_t;
-    perf_stop:        TRetro_perf_stop_t;
-    perf_log:         TRetro_perf_log_t;
+    get_time_usec    : TRetro_perf_get_time_usec_t;
+    get_cpu_features : TRetro_get_cpu_features_t;
+    get_perf_counter : TRetro_perf_get_counter_t;
+    perf_register    : TRetro_perf_register_t;
+    perf_start       : TRetro_perf_start_t;
+    perf_stop        : TRetro_perf_stop_t;
+    perf_log         : TRetro_perf_log_t;
   end;
   PRetro_perf_callback = ^TRetro_perf_callback;
 
@@ -2703,8 +2810,8 @@ type
   TRetro_sensor_get_input_t = function(port, id: cuint): cfloat; RETRO_CALLCONV;
 
   TRetro_sensor_interface = packed record
-    set_sensor_state: TRetro_set_sensor_state_t;
-    get_sensor_input: TRetro_sensor_get_input_t;
+    set_sensor_state : TRetro_set_sensor_state_t;
+    get_sensor_input : TRetro_sensor_get_input_t;
   end;
   PRetro_sensor_interface = ^TRetro_sensor_interface;
 
@@ -2807,21 +2914,20 @@ type
   TRetro_location_lifetime_status_t = procedure(); RETRO_CALLCONV;
 
   TRetro_location_callback = packed record
-    start: TRetro_location_start_t;
-    stop: TRetro_location_stop_t;
-    get_position: TRetro_location_get_position_t;
-    set_interval: TRetro_location_set_interval_t;
+    start         : TRetro_location_start_t;
+    stop          : TRetro_location_stop_t;
+    get_position  : TRetro_location_get_position_t;
+    set_interval  : TRetro_location_set_interval_t;
 
-    initialized: TRetro_location_lifetime_status_t;
-    deinitialized: TRetro_location_lifetime_status_t;
+    initialized   : TRetro_location_lifetime_status_t;
+    deinitialized : TRetro_location_lifetime_status_t;
   end;
   PRetro_location_callback = ^TRetro_location_callback;
 
   TRetro_rumble_effect = (
     RETRO_RUMBLE_STRONG = 0,
-    RETRO_RUMBLE_WEAK = 1,
-
-    RETRO_RUMBLE_DUMMY = MaxInt
+    RETRO_RUMBLE_WEAK   = 1,
+    RETRO_RUMBLE_DUMMY  = MaxInt
   );
   PRetro_rumble_effect = ^TRetro_rumble_effect;
 
@@ -2851,8 +2957,8 @@ type
   TRetro_audio_set_state_callback_t = procedure(enabled: cbool); RETRO_CALLCONV;
 
   TRetro_audio_callback = packed record
-    callback: TRetro_audio_callback_t;
-    set_state: TRetro_audio_set_state_callback_t;
+    callback  : TRetro_audio_callback_t;
+    set_state : TRetro_audio_set_state_callback_t;
   end;
   PRetro_audio_callback = ^TRetro_audio_callback;
 
@@ -2864,16 +2970,16 @@ type
    * fast-forward, slow-motion and framestepping.
    *
    * In those scenarios the reference frame time value will be used. *}
-  TRetro_usec_t = cint64;
+  TRetro_usec = cint64;
 
-  TRetro_frame_time_callback_t = procedure(usec: TRetro_usec_t); RETRO_CALLCONV;
+  TRetro_frame_time_callback_t = procedure(usec: TRetro_usec); RETRO_CALLCONV;
 
   TRetro_frame_time_callback = packed record
     callback: TRetro_frame_time_callback_t;
     {* Represents the time of one frame. It is computed as
      * 1000000 / fps, but the implementation will resolve the
      * rounding to ensure that framestepping, etc is exact. *}
-    reference: TRetro_usec_t;
+    reference: TRetro_usec;
   end;
   PRetro_frame_time_callback = ^TRetro_frame_time_callback;
 
@@ -2945,13 +3051,26 @@ type
     {* Vulkan, see RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE. *}
     RETRO_HW_CONTEXT_VULKAN           = 6,
 
-    {$IF RETRO_VERSION >= 107020}
+    {$IF RETRO_VERSION >= 116000}
+    {* Direct3D11, see RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE *}
+    RETRO_HW_CONTEXT_D3D11            = 7,
+
+    {* Direct3D10, see RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE *}
+    RETRO_HW_CONTEXT_D3D10            = 8,
+
+    {* Direct3D12, see RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE *}
+    RETRO_HW_CONTEXT_D3D12            = 9,
+
+    {* Direct3D9, see RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE *}
+    RETRO_HW_CONTEXT_D3D9             = 10,
+
+    {$ELSEIF RETRO_VERSION >= 107020}
     {* Direct3D, set version_major to select the type of interface
      * returned by RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE *}
     RETRO_HW_CONTEXT_DIRECT3D         = 7,
     {$ENDIF}
 
-    RETRO_HW_CONTEXT_DUMMY = MaxInt
+    RETRO_HW_CONTEXT_DUMMY            = MaxInt
   );
   PRetro_hw_context_type = ^TRetro_hw_context_type;
 
@@ -3092,17 +3211,17 @@ type
   TRetro_get_num_images_t = function(): cuint; RETRO_CALLCONV;
 
   TRetro_game_info = packed record
-    path: PChar;            {* Path to game, UTF-8 encoded.
-                             * Sometimes used as a reference for building other paths.
-                             * May be NULL if game was loaded from stdin or similar,
-                             * but in this case some cores will be unable to load `data`.
-                             * So, it is preferable to fabricate something here instead
-                             * of passing NULL, which will help more cores to succeed.
-                             * retro_system_info::need_fullpath requires
-                             * that this path is valid. *}
-    data: pointer;          {* Memory buffer of loaded game. Will be NULL if need_fullpath was set. *}
-    size_: csize_t;         {* Size of memory buffer. *}
-    meta: PChar;            {* String of implementation specific meta-data. *}
+    path  : PChar;        {* Path to game, UTF-8 encoded.
+                           * Sometimes used as a reference for building other paths.
+                           * May be NULL if game was loaded from stdin or similar,
+                           * but in this case some cores will be unable to load `data`.
+                           * So, it is preferable to fabricate something here instead
+                           * of passing NULL, which will help more cores to succeed.
+                           * retro_system_info::need_fullpath requires
+                           * that this path is valid. *}
+    data  : pointer;      {* Memory buffer of loaded game. Will be NULL if need_fullpath was set. *}
+    size  : csize_t;      {* Size of memory buffer. *}
+    meta  : PChar;        {* String of implementation specific meta-data. *}
   end;
   PRetro_game_info = ^TRetro_game_info;
 
@@ -3172,39 +3291,190 @@ type
   {$ENDIF}
 
   TRetro_disk_control_callback = packed record
-    set_eject_state: TRetro_set_eject_state_t;
-    get_eject_state: TRetro_get_eject_state_t;
+    set_eject_state     : TRetro_set_eject_state_t;
+    get_eject_state     : TRetro_get_eject_state_t;
 
-    get_image_index: TRetro_get_image_index_t;
-    set_image_index: TRetro_set_image_index_t;
-    get_num_images: TRetro_get_num_images_t;
+    get_image_index     : TRetro_get_image_index_t;
+    set_image_index     : TRetro_set_image_index_t;
+    get_num_images      : TRetro_get_num_images_t;
 
-    replace_image_index: TRetro_replace_image_index_t;
-    add_image_index: TRetro_add_image_index_t;
+    replace_image_index : TRetro_replace_image_index_t;
+    add_image_index     : TRetro_add_image_index_t;
   end;
   PRetro_disk_control_callback = ^TRetro_disk_control_callback;
 
   {$IF RETRO_VERSION >= 108050}
   TRetro_disk_control_ext_callback = packed record
-    set_eject_state: TRetro_set_eject_state_t;
-    get_eject_state: TRetro_get_eject_state_t;
+    set_eject_state     : TRetro_set_eject_state_t;
+    get_eject_state     : TRetro_get_eject_state_t;
 
-    get_image_index: TRetro_get_image_index_t;
-    set_image_index: TRetro_set_image_index_t;
-    get_num_images: TRetro_get_num_images_t;
+    get_image_index     : TRetro_get_image_index_t;
+    set_image_index     : TRetro_set_image_index_t;
+    get_num_images      : TRetro_get_num_images_t;
 
-    replace_image_index: TRetro_replace_image_index_t;
-    add_image_index: TRetro_add_image_index_t;
+    replace_image_index : TRetro_replace_image_index_t;
+    add_image_index     : TRetro_add_image_index_t;
 
     {* NOTE: Frontend will only attempt to record/restore
      * last used disk index if both set_initial_image()
      * and get_image_path() are implemented *}
-    set_initial_image: TRetro_set_initial_image_t; {* Optional - may be NULL *}
+    set_initial_image   : TRetro_set_initial_image_t; {* Optional - may be NULL *}
 
-    get_image_path: TRetro_get_image_path_t;       {* Optional - may be NULL *}
-    get_image_label: TRetro_get_image_label_t;     {* Optional - may be NULL *}
+    get_image_path      : TRetro_get_image_path_t;    {* Optional - may be NULL *}
+    get_image_label     : TRetro_get_image_label_t;   {* Optional - may be NULL *}
   end;
   PRetro_disk_control_ext_callback = ^TRetro_disk_control_ext_callback;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 116000}
+
+const
+
+  {* Definitions for RETRO_ENVIRONMENT_SET_NETPACKET_INTERFACE.
+   * A core can set it if sending and receiving custom network packets
+   * during a multiplayer session is desired. * }
+
+  {* Netpacket flags for retro_netpacket_send_t *}
+  RETRO_NETPACKET_UNRELIABLE  = 0;            {* Packet to be sent unreliable, depending on network quality it might not arrive. *}
+  RETRO_NETPACKET_RELIABLE    = (1 shl 0);    {* Reliable packets are guaranteed to arrive at the target in the order they were send. *}
+  RETRO_NETPACKET_UNSEQUENCED = (1 shl 1);    {* Packet will not be sequenced with other packets and may arrive out of order. Cannot be set on reliable packets. *}
+  {$IF RETRO_VERSION >= 117000}
+  RETRO_NETPACKET_FLUSH_HINT  = (1 shl 2);    {* Request the packet and any previously buffered ones to be sent immediately *}
+  RETRO_NETPACKET_BROADCAST   = $FFFF;        {* Broadcast client_id for retro_netpacket_send_t *}
+  {$ENDIF}
+
+type
+
+  {$IF RETRO_VERSION < 117000}
+
+  {* Used by the core to send a packet to one or more connected players.
+   * A single packet sent via this interface can contain up to 64 KB of data.
+   *
+   * The broadcast flag can be set to true to send to multiple connected clients.
+   * In a broadcast, the client_id argument indicates 1 client NOT to send the
+   * packet to (pass 0xFFFF to send to everyone). Otherwise, the client_id
+   * argument indicates a single client to send the packet to.
+   *
+   * A frontend must support sending reliable packets (RETRO_NETPACKET_RELIABLE).
+   * Unreliable packets might not be supported by the frontend, but the flags can
+   * still be specified. Reliable transmission will be used instead.
+   *
+   * If this function is called passing NULL for buf, it will instead flush all
+   * previously buffered outgoing packets and instantly read any incoming packets.
+   * During such a call, retro_netpacket_receive_t and retro_netpacket_stop_t can
+   * be called. The core can perform this in a loop to do a blocking read, i.e.,
+   * wait for incoming data, but needs to handle stop getting called and also
+   * give up after a short while to avoid freezing on a connection problem.
+   *
+   * This function is not guaranteed to be thread-safe and must be called during
+   * retro_run or any of the netpacket callbacks passed with this interface. *}
+  TRetro_netpacket_send_t = procedure(flags: cint; const buf: pointer; len: csize_t; client_id: cuint16; broadcast: cbool); RETRO_CALLCONV;
+
+  {* Called by the frontend to signify that a multiplayer session has started.
+   * If client_id is 0 the local player is the host of the session and at this
+   * point no other player has connected yet.
+   *
+   * If client_id is > 0 the local player is a client connected to a host and
+   * at this point is already fully connected to the host.
+   *
+   * The core must store the retro_netpacket_send_t function pointer provided
+   * here and use it whenever it wants to send a packet. This function pointer
+   * when regular receiving between frames is not enough. These function pointers
+   * remain valid until the frontend calls retro_netpacket_stop_t *}
+  TRetro_netpacket_start_t = procedure(client_id: cuint16; send_fn: TRetro_netpacket_send_t); RETRO_CALLCONV;
+
+  {$ELSE $IF RETRO_VERSION >= 117000}
+
+  {* Used by the core to send a packet to one or all connected players.
+   * A single packet sent via this interface can contain up to 64 KB of data.
+   *
+   * The client_id RETRO_NETPACKET_BROADCAST sends the packet as a broadcast to
+   * all connected players. This is supported from the host as well as clients.
+   * Otherwise, the argument indicates the player to send the packet to.
+   *
+   * A frontend must support sending reliable packets (RETRO_NETPACKET_RELIABLE).
+   * Unreliable packets might not be supported by the frontend, but the flags can
+   * still be specified. Reliable transmission will be used instead.
+   *
+   * Calling this with the flag RETRO_NETPACKET_FLUSH_HINT will send off the
+   * packet and any previously buffered ones immediately and without blocking.
+   * To only flush previously queued packets, buf or len can be passed as NULL/0.
+   *
+   * This function is not guaranteed to be thread-safe and must be called during
+   * retro_run or any of the netpacket callbacks passed with this interface. *}
+  TRetro_netpacket_send_t = procedure(flags: cint; const buf: pointer; len: csize_t; client_id: cuint16); RETRO_CALLCONV;
+
+  {* Optionally read any incoming packets without waiting for the end of the
+   * frame. While polling, retro_netpacket_receive_t and retro_netpacket_stop_t
+   * can be called. The core can perform this in a loop to do a blocking read,
+   * i.e., wait for incoming data, but needs to handle stop getting called and
+   * also give up after a short while to avoid freezing on a connection problem.
+   * It is a good idea to manually flush outgoing packets before calling this.
+   *
+   * This function is not guaranteed to be thread-safe and must be called during
+   * retro_run or any of the netpacket callbacks passed with this interface. *}
+  TRetro_netpacket_poll_receive_t = procedure();
+
+  {* Called by the frontend to signify that a multiplayer session has started.
+   * If client_id is 0 the local player is the host of the session and at this
+   * point no other player has connected yet.
+   *
+   * If client_id is > 0 the local player is a client connected to a host and
+   * at this point is already fully connected to the host.
+   *
+   * The core must store the function pointer send_fn and use it whenever it
+   * wants to send a packet. Optionally poll_receive_fn can be stored and used
+   * when regular receiving between frames is not enough. These function pointers
+   * remain valid until the frontend calls retro_netpacket_stop_t. *}
+  TRetro_netpacket_start_t = procedure(client_id: cuint16; send_fn: TRetro_netpacket_send_t; poll_receive_fn: TRetro_netpacket_poll_receive_t); RETRO_CALLCONV;
+  {$ENDIF}
+
+  {* Called by the frontend when a new packet arrives which has been sent from
+   * another player with retro_netpacket_send_t. The client_id argument indicates
+   * who has sent the packet. *}
+  TRetro_netpacket_receive_t = procedure(const buf: pointer; len: csize_t; client_id: cuint16); RETRO_CALLCONV;
+
+  {* Called by the frontend when the multiplayer session has ended.
+   * Once this gets called the retro_netpacket_send_t function pointer passed
+   * to retro_netpacket_start_t will not be valid anymore. *}
+  TRetro_netpacket_stop_t = procedure(); RETRO_CALLCONV;
+
+  {* Called by the frontend every frame (between calls to retro_run while
+   * updating the state of the multiplayer session.
+   * This is a good place for the core to call retro_netpacket_send_t from. *}
+  TRetro_netpacket_poll_t = procedure(); RETRO_CALLCONV;
+
+  {* Called by the frontend when a new player connects to the hosted session.
+   * This is only called on the host side, not for clients connected to the host.
+   * If this function returns false, the newly connected player gets dropped.
+   * This can be used for example to limit the number of players. *}
+  TRetro_netpacket_connected_t = procedure(client_id: cuint16); RETRO_CALLCONV;
+
+  {* Called by the frontend when a player leaves or disconnects from the hosted session.
+   * This is only called on the host side, not for clients connected to the host. *}
+    TRetro_netpacket_disconnected_t = procedure(client_id: cuint16); RETRO_CALLCONV;
+
+  {* A callback interface for giving a core the ability to send and receive custom
+   * network packets during a multiplayer session between two or more instances
+   * of a libretro frontend.
+   *
+   * Normally during connection handshake the frontend will compare library_version
+   * used by both parties and show a warning if there is a difference. When the core
+   * supplies protocol_version, the frontend will check against this instead.
+   *
+   * @see RETRO_ENVIRONMENT_SET_NETPACKET_INTERFACE *}
+  TRetro_netpacket_callback = packed record
+    start        : TRetro_netpacket_start_t;
+    receive      : TRetro_netpacket_receive_t;
+    stop         : TRetro_netpacket_stop_t;          {* Optional - may be NULL *}
+    poll         : TRetro_netpacket_poll_t;          {* Optional - may be NULL *}
+    connected    : TRetro_netpacket_connected_t;     {* Optional - may be NULL *}
+    disconnected : TRetro_netpacket_disconnected_t;  {* Optional - may be NULL *}
+    {$IF RETRO_VERSION >= 117000}
+    protocol_version : PChar;                        {* Optional - if not NULL will be used instead of core version to decide if communication is compatible *}
+    {$ENDIF}
+  end;
+  PRetro_netpacket_callback = ^TRetro_netpacket_callback;
   {$ENDIF}
 
   TRetro_pixel_format = (
@@ -3376,10 +3646,10 @@ type
    * This string can be used to better let a user configure input. *}
   TRetro_input_descriptor = packed record
     {* Associates given parameters with a description. *}
-    port: cuint;
-    device: cuint;
-    index: cuint;
-    id: cuint;
+    port   : cuint;
+    device : cuint;
+    index  : cuint;
+    id     : cuint;
 
     {* Human readable description for parameters.
      * The pointer must remain valid until
@@ -3541,31 +3811,130 @@ type
      persistent_data: cbool;
   end;
   PRetro_system_content_info_override = ^TRetro_system_content_info_override;
+
+  {* Similar to retro_game_info, but provides extended
+   * information about the source content file and
+   * game memory buffer status.
+   * And array of retro_game_info_ext is returned by
+   * RETRO_ENVIRONMENT_GET_GAME_INFO_EXT
+   * NOTE: In the following descriptions, references to
+   *       retro_load_game() may be replaced with
+   *       retro_load_game_special() *}
+  TRetro_game_info_ext = packed record
+     {* - If file_in_archive is false, contains a valid
+      *   path to an existent content file (UTF-8 encoded)
+      * - If file_in_archive is true, may be NULL *}
+     full_path: PChar;
+
+     {* - If file_in_archive is false, may be NULL
+      * - If file_in_archive is true, contains a valid path
+      *   to an existent compressed file inside which the
+      *   content file is located (UTF-8 encoded) *}
+     archive_path: PChar;
+
+     {* - If file_in_archive is false, may be NULL
+      * - If file_in_archive is true, contain a valid path
+      *   to an existent content file inside the compressed
+      *   file referred to by archive_path (UTF-8 encoded)
+      *      e.g. for a compressed file '/path/to/foo.zip'
+      *      containing 'bar.sfc'
+      *      > archive_path will be '/path/to/foo.zip'
+      *      > archive_file will be 'bar.sfc' *}
+     archive_file: PChar;
+
+     {* - If file_in_archive is false, contains a valid path
+      *   to the directory in which the content file exists
+      *   (UTF-8 encoded)
+      * - If file_in_archive is true, contains a valid path
+      *   to the directory in which the compressed file
+      *   (containing the content file) exists (UTF-8 encoded) *}
+     dir: PChar;
+
+     {* Contains the canonical name/ID of the content file
+      * (UTF-8 encoded). Intended for use when identifying
+      * 'complementary' content named after the loaded file -
+      * i.e. companion data of a different format (a CD image
+      * required by a ROM), texture packs, internally handled
+      * save files, etc.
+      * - If file_in_archive is false, contains the basename
+      *   of the content file, without extension
+      * - If file_in_archive is true, then string is
+      *   implementation specific. A frontend may choose to
+      *   set a name value of:
+      *   EITHER
+      *   1) the basename of the compressed file (containing
+      *      the content file), without extension
+      *   OR
+      *   2) the basename of the content file inside the
+      *      compressed file, without extension
+      *   RetroArch sets the 'name' value according to (1).
+      *   A frontend that supports routine loading of
+      *   content from archives containing multiple unrelated
+      *   content files may set the 'name' value according
+      *   to (2). *}
+     name: PChar;
+
+     {* - If file_in_archive is false, contains the extension
+      *   of the content file in lower case format
+      * - If file_in_archive is true, contains the extension
+      *   of the content file inside the compressed file,
+      *   in lower case format *}
+     ext: PChar;
+
+     {* String of implementation specific meta-data. *}
+     meta: PChar;
+
+     {* Memory buffer of loaded game content. Will be NULL:
+      * IF
+      * - retro_system_info::need_fullpath is true and
+      *   retro_system_content_info_override::need_fullpath
+      *   is unset
+      * OR
+      * - retro_system_content_info_override::need_fullpath
+      *   is true *}
+     data: pointer;
+
+     {* Size of game content memory buffer, in bytes *}
+     size: csize_t;
+
+     {* True if loaded content file is inside a compressed archive *}
+     file_in_archive: cbool;
+
+     {* - If data is NULL, value is unset/ignored
+      * - If data is non-NULL:
+      *   - If persistent_data is false, data and size are
+      *     valid only until retro_load_game() returns
+      *   - If persistent_data is true, data and size are
+      *     are valid until retro_deinit() returns *}
+     persistent_data: cbool;
+   end;
+  PRetro_game_info_ext = ^TRetro_game_info_ext;
+
   {$ENDIF}
 
   TRetro_game_geometry = packed record
-    base_width: cuint;     {* Nominal video width of game. *}
-    base_height: cuint;    {* Nominal video height of game. *}
-    max_width: cuint;      {* Maximum possible width of game. *}
-    max_height: cuint;     {* Maximum possible height of game. *}
+    base_width    : cuint;    {* Nominal video width of game. *}
+    base_height   : cuint;    {* Nominal video height of game. *}
+    max_width     : cuint;    {* Maximum possible width of game. *}
+    max_height    : cuint;    {* Maximum possible height of game. *}
 
-    aspect_ratio: cfloat;  {* Nominal aspect ratio of game. If
-                            * aspect_ratio is <= 0.0, an aspect ratio
-                            * of base_width / base_height is assumed.
-                            * A frontend could override this setting,
-                            * if desired. *}
+    aspect_ratio  : cfloat;   {* Nominal aspect ratio of game. If
+                               * aspect_ratio is <= 0.0, an aspect ratio
+                               * of base_width / base_height is assumed.
+                               * A frontend could override this setting,
+                               * if desired. *}
   end;
   PRetro_game_geometry = ^TRetro_game_geometry;
 
   TRetro_system_timing = packed record
-    fps: cdouble;            {* FPS of video content. *}
-    sample_rate: cdouble;    {* Sampling rate of audio. *}
+    fps         : cdouble;    {* FPS of video content. *}
+    sample_rate : cdouble;    {* Sampling rate of audio. *}
   end;
   PRetro_system_timing = ^TRetro_system_timing;
 
   TRetro_system_av_info = packed record
-    geometry: TRetro_game_geometry;
-    timing: TRetro_system_timing;
+    geometry : TRetro_game_geometry;
+    timing   : TRetro_system_timing;
   end;
   PRetro_system_av_info = ^TRetro_system_av_info;
 
@@ -3584,6 +3953,18 @@ type
   PRetro_variable = ^TRetro_variable;
 
   {$IF RETRO_VERSION >= 107080}
+
+type
+
+  TRetro_core_option_display = packed record
+    {* Variable to configure in RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY *}
+    key: PChar;
+
+    {* Specifies whether variable should be displayed
+     * when presenting core options to the user *}
+    visible: cbool;
+  end;
+  PRetro_core_option_display = ^TRetro_core_option_display;
 
 const
 
@@ -3604,16 +3985,6 @@ const
   RETRO_NUM_CORE_OPTION_VALUES_MAX = 128;
 
 type
-
-  TRetro_core_option_display = packed record
-    {* Variable to configure in RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY *}
-    key: PChar;
-
-    {* Specifies whether variable should be displayed
-     * when presenting core options to the user *}
-    visible: cbool;
-  end;
-  PRetro_core_option_display = ^TRetro_core_option_display;
 
   TRetro_core_option_value = packed record
     {* Expected option value *}
@@ -3907,6 +4278,249 @@ type
       * the frontend is longer than what is available for one frame. *}
      rate: cfloat;
   end;
+  PRetro_throttle_state = ^TRetro_throttle_state;
+  {$ENDIF}
+
+  {$IF RETRO_VERSION >= 116000}
+
+type
+
+  {* Opaque handle to a microphone that's been opened for use.
+   * The underlying object is accessed or created with \c retro_microphone_interface_t. *}
+  TRetro_microphone = packed record end;
+  PRetro_microphone = ^TRetro_microphone;
+
+  {* Parameters for configuring a microphone.
+   * Some of these might not be honored,
+   * depending on the available hardware and driver configuration. *}
+  TRetro_microphone_params = packed record
+    {* The desired sample rate of the microphone's input, in Hz.
+     * The microphone's input will be resampled,
+     * so cores can ask for whichever frequency they need.
+     *
+     * If zero, some reasonable default will be provided by the frontend
+     * (usually from its config file).
+     *
+     * @see retro_get_mic_rate_t *}
+     rate: cuint;
+  end;
+  PRetro_microphone_params = ^TRetro_microphone_params;
+
+  {* retro_microphone_interface::open_mic *}
+  TRetro_open_mic_t = function(const params: PRetro_microphone_params): PRetro_microphone; RETRO_CALLCONV;
+
+  {* retro_microphone_interface::close_mic *}
+  TRetro_close_mic_t = procedure(microphone: PRetro_microphone); RETRO_CALLCONV;
+
+  {* retro_microphone_interface::get_params *}
+  TRetro_get_mic_params_t = procedure(const microphone: PRetro_microphone; params: PRetro_microphone_params); RETRO_CALLCONV;
+
+  //{* retro_microphone_interface::set_mic_state }
+  TRetro_set_mic_state_t = function(microphone: PRetro_microphone; state: cbool): cbool; RETRO_CALLCONV;
+
+  {* retro_microphone_interface::get_mic_state *}
+  TRetro_get_mic_state_t = function(const microphone: PRetro_microphone): cbool; RETRO_CALLCONV;
+
+  {* retro_microphone_interface::read_mic *}
+  TRetro_read_mic_t = function(microphone: PRetro_microphone; samples: cint16; num_samples: csize_t): cint; RETRO_CALLCONV;
+
+const
+
+  {* The current version of the microphone interface.
+   * Will be incremented whenever \c retro_microphone_interface or \c retro_microphone_params_t
+   * receive new fields.
+   *
+   * Frontends using cores built against older mic interface versions
+   * should not access fields introduced in newer versions. *}
+  RETRO_MICROPHONE_INTERFACE_VERSION = 1;
+
+type
+
+  {* An interface for querying the microphone and accessing data read from it.
+   *
+   * @see RETRO_ENVIRONMENT_GET_MICROPHONE_INTERFACE *}
+  TRetro_microphone_interface = packed record
+
+     {* The version of this microphone interface.
+      * Set by the core to request a particular version,
+      * and set by the frontend to indicate the returned version.
+      * 0 indicates that the interface is invalid or uninitialized. *}
+     interface_version: cuint;
+
+     {* Initializes a new microphone.
+      * Assuming that microphone support is enabled and provided by the frontend,
+      * cores may call this function whenever necessary.
+      * A microphone could be opened throughout a core's lifetime,
+      * or it could wait until a microphone is plugged in to the emulated device.
+      *
+      * The returned handle will be valid until it's freed,
+      * even if the audio driver is reinitialized.
+      *
+      * This function is not guaranteed to be thread-safe.
+      *
+      * @param args[in] Parameters used to create the microphone.
+      * May be \c NULL, in which case the default value of each parameter will be used.
+      *
+      * @returns Pointer to the newly-opened microphone,
+      * or \c NULL if one couldn't be opened.
+      * This likely means that no microphone is plugged in and recognized,
+      * or the maximum number of supported microphones has been reached.
+      *
+      * @note Microphones are \em inactive by default;
+      * to begin capturing audio, call \c set_mic_state.
+      * @see retro_microphone_params_t *}
+     open_mic: TRetro_open_mic_t;
+
+     {* Closes a microphone that was initialized with \c open_mic.
+      * Calling this function will stop all microphone activity
+      * and free up the resources that it allocated.
+      * Afterwards, the handle is invalid and must not be used.
+      *
+      * A frontend may close opened microphones when unloading content,
+      * but this behavior is not guaranteed.
+      * Cores should close their microphones when exiting, just to be safe.
+      *
+      * @param microphone Pointer to the microphone that was allocated by \c open_mic.
+      * If \c NULL, this function does nothing.
+      *
+      * @note The handle might be reused if another microphone is opened later. *}
+     close_mic: TRetro_close_mic_t;
+
+     {* Returns the configured parameters of this microphone.
+      * These may differ from what was requested depending on
+      * the driver and device configuration.
+      *
+      * Cores should check these values before they start fetching samples.
+      *
+      * Will not change after the mic was opened.
+      *
+      * @param microphone[in] Opaque handle to the microphone
+      * whose parameters will be retrieved.
+      * @param params[out] The parameters object that the
+      * microphone's parameters will be copied to.
+      *
+      * @return \c true if the parameters were retrieved,
+      * \c false if there was an error. *}
+     get_params: TRetro_get_mic_params_t;
+
+     {* Enables or disables the given microphone.
+      * Microphones are disabled by default
+      * and must be explicitly enabled before they can be used.
+      * Disabled microphones will not process incoming audio samples,
+      * and will therefore have minimal impact on overall performance.
+      * Cores may enable microphones throughout their lifetime,
+      * or only for periods where they're needed.
+      *
+      * Cores that accept microphone input should be able to operate without it;
+      * we suggest substituting silence in this case.
+      *
+      * @param microphone Opaque handle to the microphone
+      * whose state will be adjusted.
+      * This will have been provided by \c open_mic.
+      * @param state \c true if the microphone should receive audio input,
+      * \c false if it should be idle.
+      * @returns \c true if the microphone's state was successfully set,
+      * \c false if \c microphone is invalid
+      * or if there was an error. *}
+     set_mic_state: TRetro_set_mic_state_t;
+
+     {* Queries the active state of a microphone at the given index.
+      * Will return whether the microphone is enabled,
+      * even if the driver is paused.
+      *
+      * @param microphone Opaque handle to the microphone
+      * whose state will be queried.
+      * @return \c true if the provided \c microphone is valid and active,
+      * \c false if not or if there was an error. *}
+     get_mic_state: TRetro_get_mic_state_t;
+
+     {* Retrieves the input processed by the microphone since the last call.
+      * \em Must be called every frame unless \c microphone is disabled,
+      * similar to how \c retro_audio_sample_batch_t works.
+      *
+      * @param[in] microphone Opaque handle to the microphone
+      * whose recent input will be retrieved.
+      * @param[out] samples The buffer that will be used to store the microphone's data.
+      * Microphone input is in mono (i.e. one number per sample).
+      * Should be large enough to accommodate the expected number of samples per frame;
+      * for example, a 44.1kHz sample rate at 60 FPS would require space for 735 samples.
+      * @param[in] num_samples The size of the data buffer in samples (\em not bytes).
+      * Microphone input is in mono, so a "frame" and a "sample" are equivalent in length here.
+      *
+      * @return The number of samples that were copied into \c samples.
+      * If \c microphone is pending driver initialization,
+      * this function will copy silence of the requested length into \c samples.
+      *
+      * Will return -1 if the microphone is disabled,
+      * the audio driver is paused,
+      * or there was an error. *}
+     read_mic: TRetro_read_mic_t;
+  end;
+  PRetro_microphone_interface = ^TRetro_microphone_interface;
+
+  {* Describes how a device is being powered.
+   * @see RETRO_ENVIRONMENT_GET_DEVICE_POWER *}
+  TRetro_power_state = (
+
+     {* Indicates that the frontend cannot report its power state at this time,
+      * most likely due to a lack of support.
+      *
+      * \c RETRO_ENVIRONMENT_GET_DEVICE_POWER will not return this value;
+      * instead, the environment callback will return \c false. *}
+     RETRO_POWERSTATE_UNKNOWN = 0,
+
+     {* Indicates that the device is running on its battery.
+      * Usually applies to portable devices such as handhelds, laptops, and smartphones. *}
+     RETRO_POWERSTATE_DISCHARGING,
+
+     {* Indicates that the device's battery is currently charging. *}
+     RETRO_POWERSTATE_CHARGING,
+
+     {* Indicates that the device is connected to a power source
+      * and that its battery has finished charging. *}
+     RETRO_POWERSTATE_CHARGED,
+
+     {* Indicates that the device is connected to a power source
+      * and that it does not have a battery.
+      * This usually suggests a desktop computer or a non-portable game console. *}
+     RETRO_POWERSTATE_PLUGGED_IN
+  );
+  PRetro_power_state = ^TRetro_power_state;
+
+const
+
+  {* Indicates that an estimate is not available for the battery level or time remaining,
+   * even if the actual power state is known. *}
+  RETRO_POWERSTATE_NO_ESTIMATE = (-1);
+
+type
+
+  {* Describes the power state of the device running the frontend.
+   * @see RETRO_ENVIRONMENT_GET_DEVICE_POWER *}
+  TRetro_device_power = packed record
+
+     {* The current state of the frontend's power usage. *}
+     state: TRetro_power_state;
+
+     {* A rough estimate of the amount of time remaining (in seconds)
+      * before the device powers off.
+      * This value depends on a variety of factors,
+      * so it is not guaranteed to be accurate.
+      *
+      * Will be set to \c RETRO_POWERSTATE_NO_ESTIMATE if \c state does not equal \c RETRO_POWERSTATE_DISCHARGING.
+      * May still be set to \c RETRO_POWERSTATE_NO_ESTIMATE if the frontend is unable to provide an estimate. *}
+     seconds: cint;
+
+     {* The approximate percentage of battery charge,
+      * ranging from 0 to 100 (inclusive).
+      * The device may power off before this reaches 0.
+      *
+      * The user might have configured their device
+      * to stop charging before the battery is full,
+      * so do not assume that this will be 100 in the \c RETRO_POWERSTATE_CHARGED state. *}
+     percent: cint8;
+  end;
+
   {$ENDIF}
 
   {* Callbacks *}
