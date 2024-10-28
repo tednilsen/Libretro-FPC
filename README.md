@@ -1,5 +1,5 @@
 # Libretro-FPC
-Libretro API Headers v1.14 for FPC / Lazarus, based on libretro.h
+Libretro API Headers v1.17 for FPC / Lazarus, based on libretro.h
 
 * Includes headers, helpers, templates for Lazarus and some examples.
 * All for easy starters.
